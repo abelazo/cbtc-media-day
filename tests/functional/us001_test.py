@@ -6,7 +6,7 @@ This test simulates the end-to-end behavior described in the User Story.
 
 import json
 import pytest
-from services.example_service.src.handler import lambda_handler
+from services.content_service.src.handler import lambda_handler
 
 
 class TestUS001ExampleUserStory:

@@ -28,10 +28,10 @@ This service provides a simple greeting API endpoint that:
 
 ```bash
 # Run unit tests
-pytest services/example-service/tests/
+pytest services/content_service/tests/
 
 # Run with coverage
-pytest services/example-service/tests/ --cov=services/example-service/src
+pytest services/content_service/tests/ --cov=services/content_service/src
 ```
 
 ## Deployment

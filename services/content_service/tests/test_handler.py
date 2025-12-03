@@ -4,7 +4,7 @@ Unit tests for example service handler.
 
 import json
 import pytest
-from src.handler import lambda_handler
+from services.content_service.src.handler import lambda_handler
 
 
 class TestLambdaHandler:

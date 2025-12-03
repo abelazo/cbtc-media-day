@@ -27,7 +27,8 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     
     try:
         # Example business logic
-        name = event.get("queryStringParameters", {}).get("name", "World")
+        query_params = event.get("queryStringParameters") or {}
+        name = query_params.get("name", "World")
         message = f"Hello, {name}!"
         
         return {
