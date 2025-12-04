@@ -33,11 +33,4 @@ provider "aws" {
   }
 }
 
-# Data source to reference global infrastructure
-data "terraform_remote_state" "global" {
-  backend = "local"
 
-  config = {
-    path = "../global/terraform.tfstate"
-  }
-}

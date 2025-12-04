@@ -37,8 +37,8 @@ jobs:
         run: |
           uv run black --check .
   
-  terraform-fmt:
-    name: Terraform Format Check
+  terraform-qa:
+    name: Terraform QA Checks
     runs-on: ubuntu-latest
     
     steps:
@@ -50,6 +50,32 @@ jobs:
         with:
           terraform_version: "1.5.0"
       
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: "v0.50.3"
+
+      - name: Init TFLint
+        run: tflint --init
+        env:
+          # https://github.com/terraform-linters/tflint/blob/master/docs/user-guide/plugins.md#avoiding-rate-limiting
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Terraform Format Check
         run: |
           terraform fmt -check -recursive infra/
+
+      - name: Terraform Init
+        run: |
+          cd infra/
+          terraform init -backend=false
+
+      - name: Terraform Validate
+        run: |
+          cd infra/
+          terraform validate
+
+      - name: Run TFLint
+        run: |
+          tflint --chdir=infra/ --recursive
+
