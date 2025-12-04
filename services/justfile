@@ -1,0 +1,28 @@
+# Services management recipes
+
+# Import content service module
+mod content 'content_service'
+
+# Default recipe - show available commands
+help:
+    @just --list
+
+# Run all service tests
+test-all:
+    @echo "Running all service tests..."
+    uv run pytest ./
+    @echo "✓ All service tests passed"
+
+# Lint all services
+lint-all:
+    @echo "Linting all services..."
+    uv run ruff check .
+    uv run black --check .
+    @echo "✓ All services linted"
+
+# Format all services
+format-all:
+    @echo "Formatting all services..."
+    uv run black .
+    uv run ruff check --fix .
+    @echo "✓ All services formatted"

@@ -1,0 +1,27 @@
+# Functional tests recipes
+
+# Run all functional tests
+run:
+    @echo "Running functional tests..."
+    uv run pytest functional/ -v
+    @echo "✓ Functional tests passed"
+
+# Run functional tests with coverage
+run-coverage:
+    @echo "Running functional tests with coverage..."
+    uv run pytest functional/ --cov=services --cov=libs --cov-report=term-missing
+    @echo "✓ Coverage report complete"
+
+# Run specific functional test by user story ID
+run-story story_id:
+    @echo "Running functional test for user story {{story_id}}..."
+    uv run pytest functional/{{story_id}}_test.py -v
+    @echo "✓ User story {{story_id}} test passed"
+
+# Clean test artifacts
+clean:
+    @echo "Cleaning test artifacts..."
+    find functional/ -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+    find functional/ -type d -name ".pytest_cache" -exec rm -rf {} + 2>/dev/null || true
+    rm -rf .coverage htmlcov/
+    @echo "✓ Test artifacts cleaned"

@@ -1,0 +1,69 @@
+# Infrastructure management recipes
+
+# Default recipe - show available commands
+help:
+    @just --list
+
+# Initialize Terraform (global stack)
+[group('init')]
+init stack="global":
+    @echo "Initializing Terraform for {{stack}} stack..."
+    cd {{stack}} && terraform init
+    @echo "✓ Terraform initialized for {{stack}}"
+
+# Plan Terraform changes (global stack)
+[group('apply')]
+plan stack="global":
+    @echo "Planning Terraform changes for {{stack}} stack..."
+    cd {{stack}} && terraform plan
+    @echo "✓ Plan complete for {{stack}}"
+
+# Apply Terraform changes (global stack)
+[group('apply')]
+apply stack="global":
+    @echo "Applying Terraform changes for {{stack}} stack..."
+    cd {{stack}} && terraform apply
+    @echo "✓ Applied changes for {{stack}}"
+
+# Destroy infrastructure (with confirmation)
+[group('apply')]
+destroy stack="global":
+    @echo "⚠️  WARNING: This will destroy {{stack}} infrastructure!"
+    cd {{stack}} && terraform destroy
+    @echo "✓ Destroyed {{stack}} infrastructure"
+
+# Format Terraform files
+[group('lint')]
+fmt stack="global":
+    @echo "Formatting Terraform files for {{stack}}..."
+    cd {{stack}} && terraform fmt -recursive
+    @echo "✓ Formatted {{stack}} Terraform files"
+
+# Validate Terraform configuration
+[group('lint')]
+validate stack="global":
+    @echo "Validating Terraform for {{stack}}..."
+    cd {{stack}} && terraform validate
+    @echo "✓ Validated {{stack}} configuration"
+
+# Start LocalStack
+[group('localstack')]
+localstack-start:
+    @echo "Starting LocalStack..."
+    docker-compose up -d
+    @echo "Waiting for LocalStack to be ready..."
+    sleep 5
+    @echo "✓ LocalStack started"
+
+# Stop LocalStack
+[group('localstack')]
+localstack-stop:
+    @echo "Stopping LocalStack..."
+    docker-compose down
+    @echo "✓ LocalStack stopped"
+
+# Status LocalStack
+[group('localstack')]
+localstack-status:
+    @echo "Checking LocalStack status..."
+    docker-compose ps

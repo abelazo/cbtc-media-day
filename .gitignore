@@ -54,6 +54,9 @@ htmlcov/
 .env
 .env.local
 
+# LocalStack
+volume/
+
 # OS
 .DS_Store
 Thumbs.db

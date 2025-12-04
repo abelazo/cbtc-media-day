@@ -69,8 +69,9 @@ Each User Story is documented in `/docs/user_stories/<user_story_id>.md` with:
 
 - Python 3.12
 - [uv](https://docs.astral.sh/uv/) - Fast Python package installer
-- Terraform >= 1.5
+- Terraform >= 1.31.1
 - AWS CLI configured
+- Docker and docker-compose (for LocalStack testing)
 
 ### Installation
 
@@ -88,52 +89,50 @@ uv sync --only-dev
 uv sync --all-extras
 ```
 
+
+### Developer Default Workflow
+
+The recommended workflow for local development using `just` and LocalStack:
+
+```bash
+# 1. Start LocalStack
+just infra::start-localstack
+
+# 2. Provision shared infrastructure (S3, etc.)
+just infra::init global && just infra::apply global
+
+# 3. Build and deploy service
+just services::content::build
+
+# 4. Provision lambda services
+just infra::init services && just infra::apply services
+
+# 5. Run functional tests
+just tests::run
+
+# 6. Manual Verification
+# Replace <API_GW_ID> with the output from 'terraform output -raw api_gateway_id' in infra/services
+curl -s http://<API_GW_ID>.execute-api.localhost.localstack.cloud:4566/v1/content
+```
+
 ### Running Tests Locally
 
 ```bash
-# Run all tests
-uv run pytest
-
-# Run functional tests only
-uv run pytest tests/functional/
-
-# Run unit tests for a specific service
-uv run pytest services/<service_name>/tests/
+# Unit tests
+just services::<service_name>::test
 
 # Run with coverage
-uv run pytest --cov=services --cov=libs
+just services::<service_name>::test-coverage
 ```
 
 ### Code Quality
 
 ```bash
-# Lint with ruff
-uv run ruff check .
-
-# Format with black
-uv run black .
-
-# Check formatting without modifying
-uv run black --check .
+# Lint with ruff and black
+just services::<service_name>::lint
 
 # Terraform formatting
-terraform fmt -check -recursive infra/
-```
-
-### Running Terraform
-
-```bash
-# Global infrastructure
-cd infra/global
-terraform init
-terraform plan
-terraform apply
-
-# Service infrastructure
-cd infra/services
-terraform init
-terraform plan
-terraform apply
+just infra::lint
 ```
 
 ## CI/CD Overview
@@ -142,8 +141,9 @@ Our GitHub Actions pipelines run on every PR:
 
 1. **Test Pipeline**: Runs functional + unit tests
 2. **Lint Pipeline**: Runs ruff, black --check, terraform fmt -check
-3. **Terraform Plan**: Shows infrastructure changes on PR
-4. **Deploy Pipeline**: Runs terraform apply on merge to main (with approval for prod)
+3. **LocalStack Test Pipeline**: Deploys infrastructure to LocalStack and runs functional tests
+4. **Terraform Plan**: Shows infrastructure changes on PR
+5. **Deploy Pipeline**: Runs terraform apply on merge to main (with approval for prod)
 
 ## Contributing
 
