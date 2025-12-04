@@ -27,7 +27,7 @@ jobs:
       
       - name: Install dependencies
         run: |
-          uv sync --frozen --only-dev
+          uv sync --frozen --extra dev
       
       - name: Check code with ruff
         run: |
