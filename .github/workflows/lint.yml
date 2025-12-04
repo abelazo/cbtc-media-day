@@ -48,12 +48,12 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: "1.5.0"
+          terraform_version: "1.13.1"
       
       - name: Setup TFLint
         uses: terraform-linters/setup-tflint@v4
         with:
-          tflint_version: "v0.50.3"
+          tflint_version: "v0.60.0"
 
       - name: Init TFLint
         run: tflint --init
@@ -62,20 +62,17 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Terraform Format Check
-        run: |
-          terraform fmt -check -recursive infra/
+        working-directory: infra
+        run: terraform fmt -check -recursive
 
       - name: Terraform Init
-        run: |
-          cd infra/
-          terraform init -backend=false
+        working-directory: infra
+        run: terraform init -backend=false
 
       - name: Terraform Validate
-        run: |
-          cd infra/
-          terraform validate
+        working-directory: infra
+        run: terraform validate
 
       - name: Run TFLint
-        run: |
-          tflint --chdir=infra/ --recursive
-
+        working-directory: infra
+        run: tflint --recursive
