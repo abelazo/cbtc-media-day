@@ -15,7 +15,7 @@ on:
           - prod
 
 env:
-  TF_VERSION: "1.5.0"
+  TF_VERSION: "1.13.1"
 
 jobs:
   deploy-dev:
