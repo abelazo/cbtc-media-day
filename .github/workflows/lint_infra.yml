@@ -25,18 +25,17 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
+      - name: Install Just
+        uses: extractions/setup-just@v3
+
       - name: Terraform init
-        run: terraform init --backend=false
+        run: just infra::init global
 
       - name: Terraform Format Check
-        working-directory: infra
-        run: terraform fmt -check -recursive
+        run: just infra::fmt global
       
       - name: Terraform Validate
-        working-directory: infra
-        run: terraform validate --recursive
+        run: just infra::validate global
       
       - name: Terraform TFLint
-        working-directory: infra
-        run: tflint --recursive
-
+        run: just infra::tflint global

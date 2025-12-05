@@ -50,7 +50,7 @@ validate stack="global":
 [group('localstack')]
 localstack-start:
     @echo "Starting LocalStack..."
-    docker-compose up -d
+    docker compose up -d
     @echo "Waiting for LocalStack to be ready..."
     sleep 5
     @echo "✓ LocalStack started"
@@ -59,11 +59,11 @@ localstack-start:
 [group('localstack')]
 localstack-stop:
     @echo "Stopping LocalStack..."
-    docker-compose down
+    docker compose down
     @echo "✓ LocalStack stopped"
 
 # Status LocalStack
 [group('localstack')]
 localstack-status:
     @echo "Checking LocalStack status..."
-    docker-compose ps
+    docker compose ps
