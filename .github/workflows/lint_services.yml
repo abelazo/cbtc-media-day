@@ -1,7 +1,7 @@
 name: Lint Services
 
 on:
-  pull_request:
+  push:
     paths:
       - 'services/**'
       - '.github/workflows/lint_services.yml'

@@ -5,7 +5,7 @@ env:
   TF_VERSION: 1.13.1
 
 on:
-  pull_request:
+  push:
     paths:
       - 'infra/**'
       - '.github/workflows/lint_infra.yml'
