@@ -25,6 +25,12 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v6
+        with:
+          tflint_version: v0.52.0
+          cache: true
+
       - name: Install Just
         uses: extractions/setup-just@v3
 
