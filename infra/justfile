@@ -46,6 +46,13 @@ validate stack="global":
     cd {{stack}} && terraform validate
     @echo "✓ Validated {{stack}} configuration"
 
+# Validate Terraform configuration
+[group('lint')]
+lint stack="global":
+    @echo "Linting Terraform for {{stack}}..."
+    cd {{stack}} && tflint --recursive
+    @echo "✓ Linted {{stack}} configuration"
+
 # Start LocalStack
 [group('localstack')]
 localstack-start:

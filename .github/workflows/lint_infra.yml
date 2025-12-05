@@ -38,4 +38,4 @@ jobs:
         run: just infra::validate global
       
       - name: Terraform TFLint
-        run: just infra::tflint global
+        run: just infra::lint global
