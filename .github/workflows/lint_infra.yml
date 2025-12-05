@@ -1,0 +1,38 @@
+---
+name: Lint Infrastructure
+
+on:
+  pull_request:
+    paths:
+      - 'infra/**'
+
+jobs:
+
+  lint-infrastructure:
+    name: Lint Infrastructure
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform init
+        run: terraform init --backend=false
+
+      - name: Terraform Format Check
+        working-directory: infra
+        run: terraform fmt -check -recursive
+      
+      - name: Terraform Validate
+        working-directory: infra
+        run: terraform validate --recursive
+      
+      - name: Terraform TFLint
+        working-directory: infra
+        run: tflint --recursive
+

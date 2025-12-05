@@ -15,74 +15,17 @@ on:
           - dev
           - prod
 
-env:
-  TF_VERSION: "1.13.1"
-
 jobs:
-  deploy-dev:
-    name: Deploy to Development
+  unit-tests:
+    uses: ./.github/workflows/tests-ut.yml
+
+  e2e-tests:
+    needs: unit-tests
+    uses: ./.github/workflows/tests-e2e.yml
+
+  deploy:
+    needs: e2e-tests
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || github.event.inputs.environment == 'dev'
-    environment: development
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: ${{ env.TF_VERSION }}
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-
-      - name: Deploy Global Infrastructure
-        working-directory: infra/global
-        run: |
-          terraform init
-          terraform apply -auto-approve
-
-      - name: Deploy Services Infrastructure
-        working-directory: infra/services
-        run: |
-          terraform init
-          terraform apply -auto-approve
-
-  deploy-prod:
-    name: Deploy to Production
-    runs-on: ubuntu-latest
-    if: github.event.inputs.environment == 'prod'
-    environment: production
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: ${{ env.TF_VERSION }}
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-
-      - name: Deploy Global Infrastructure
-        working-directory: infra/global
-        run: |
-          terraform init
-          terraform apply -auto-approve -var="environment=prod"
-
-      - name: Deploy Services Infrastructure
-        working-directory: infra/services
-        run: |
-          terraform init
-          terraform apply -auto-approve -var="environment=prod"
+      - name: Deploy
+        run: echo "Deploy goes here"

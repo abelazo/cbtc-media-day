@@ -1,0 +1,83 @@
+name: End-to-End Tests
+
+on:
+  workflow_call:
+  pull_request:
+    branches: [main]
+
+jobs:
+  e2e-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: |
+          uv sync --all-extras
+
+      - name: Install Just
+        uses: extractions/setup-just@v3
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.31.1
+
+      - name: Start LocalStack
+        run: |
+          just infra::localstack-start
+
+      - name: Provision Global Infrastructure
+        env:
+          AWS_ACCESS_KEY_ID: test
+          AWS_SECRET_ACCESS_KEY: test
+          AWS_DEFAULT_REGION: eu-west-1
+          AWS_ENDPOINT_URL: http://localhost:4566
+        run: |
+          just infra::init global
+          just infra::apply global
+
+      - name: Build Services
+        env:
+          AWS_ACCESS_KEY_ID: test
+          AWS_SECRET_ACCESS_KEY: test
+          AWS_DEFAULT_REGION: eu-west-1
+          AWS_ENDPOINT_URL: http://localhost:4566
+        run: |
+          just services::build-all
+
+      - name: Provision Services Infrastructure
+        env:
+          AWS_ACCESS_KEY_ID: test
+          AWS_SECRET_ACCESS_KEY: test
+          AWS_DEFAULT_REGION: eu-west-1
+          AWS_ENDPOINT_URL: http://localhost:4566
+        run: |
+          just infra::init services
+          just infra::apply services
+
+      - name: Run Functional Tests
+        env:
+          AWS_ACCESS_KEY_ID: test
+          AWS_SECRET_ACCESS_KEY: test
+          AWS_DEFAULT_REGION: eu-west-1
+          AWS_ENDPOINT_URL: http://localhost:4566
+        run: |
+          just tests::run
+
+      - name: Stop LocalStack
+        if: always()
+        run: |
+          just infra::localstack-stop
