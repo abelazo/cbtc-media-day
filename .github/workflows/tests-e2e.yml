@@ -33,7 +33,10 @@ jobs:
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.31.1
+          terraform_version: 1.13.1
+
+      - name: Set up Docker compose
+        uses: docker/setup-docker-compose@v5
 
       - name: Start LocalStack
         run: |
