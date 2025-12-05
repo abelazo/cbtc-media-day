@@ -5,6 +5,7 @@ on:
   pull_request:
     paths:
       - 'infra/**'
+      - '.github/workflows/lint_infra.yml'
 
 jobs:
 
