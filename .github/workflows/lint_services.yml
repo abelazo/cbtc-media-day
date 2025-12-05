@@ -6,6 +6,9 @@ on:
       - 'services/**'
       - '.github/workflows/lint_services.yml'
 
+env:
+  UV_VERSION: 0.5.0
+
 jobs:
   lint-services:
     runs-on: ubuntu-latest
@@ -23,6 +26,7 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
+          version: ${{ env.UV_VERSION }}
       
       - name: Install dependencies
         run: uv sync --frozen --extra dev
@@ -32,4 +36,3 @@ jobs:
 
       - name: Check code with ruff
         run: uv run ruff check .
-        

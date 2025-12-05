@@ -36,7 +36,7 @@ jobs:
           terraform_version: 1.13.1
 
       - name: Set up Docker compose
-        uses: docker/setup-docker-compose@v5
+        uses: docker/setup-docker-compose@v1
 
       - name: Start LocalStack
         run: |
