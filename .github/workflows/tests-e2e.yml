@@ -1,4 +1,5 @@
-name: End-to-End Tests
+---
+name: "[template] End-to-End Tests"
 
 on:
   workflow_call:
@@ -8,7 +9,7 @@ on:
 jobs:
   e2e-tests:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
