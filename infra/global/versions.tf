@@ -4,16 +4,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.0"
+      version = "~> 6.12.0"
     }
   }
-
-  # Configure remote backend (uncomment and configure as needed)
-  # backend "s3" {
-  #   bucket         = "cbtc-media-day-terraform-state"
-  #   key            = "global/terraform.tfstate"
-  #   region         = "eu-west-1"
-  #   dynamodb_table = "cbtc-media-day-terraform-locks"
-  #   encrypt        = true
-  # }
 }

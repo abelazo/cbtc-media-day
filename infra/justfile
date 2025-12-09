@@ -6,16 +6,16 @@ help:
 
 # Initialize Terraform (global stack)
 [group('init')]
-init stack="global":
+init stack="global" +args="":
     @echo "Initializing Terraform for {{stack}} stack..."
-    cd {{stack}} && terraform init
+    cd {{stack}} && terraform init {{args}}
     @echo "✓ Terraform initialized for {{stack}}"
 
 # Plan Terraform changes (global stack)
 [group('apply')]
-plan stack="global":
+plan stack="global" +args="":
     @echo "Planning Terraform changes for {{stack}} stack..."
-    cd {{stack}} && terraform plan
+    cd {{stack}} && terraform plan {{args}}
     @echo "✓ Plan complete for {{stack}}"
 
 # Apply Terraform changes (global stack)
