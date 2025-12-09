@@ -20,9 +20,9 @@ plan stack="global":
 
 # Apply Terraform changes (global stack)
 [group('apply')]
-apply stack="global":
+apply stack="global" +args="":
     @echo "Applying Terraform changes for {{stack}} stack..."
-    cd {{stack}} && terraform apply
+    cd {{stack}} && terraform apply {{args}}
     @echo "✓ Applied changes for {{stack}}"
 
 # Destroy infrastructure (with confirmation)
