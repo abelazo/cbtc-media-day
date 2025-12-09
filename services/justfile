@@ -26,3 +26,14 @@ format-all:
     uv run black .
     uv run ruff check --fix .
     @echo "✓ All services formatted"
+
+# Build all services
+build-all:
+    @echo "Building all services..."
+    @for dir in */; do \
+        if [ -f "$dir/build.sh" ]; then \
+            echo "Building service in $dir..."; \
+            (cd "$dir" && bash build.sh); \
+        fi \
+    done
+    @echo "✓ All services built"
