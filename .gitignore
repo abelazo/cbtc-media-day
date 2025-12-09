@@ -21,6 +21,9 @@ wheels/
 *.egg
 MANIFEST
 
+# Ruff
+.ruff_cache/
+
 # Virtual environments
 .venv/
 venv/

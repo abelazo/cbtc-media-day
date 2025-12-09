@@ -12,7 +12,7 @@ terraform {
   # backend "s3" {
   #   bucket         = "cbtc-media-day-terraform-state"
   #   key            = "services/terraform.tfstate"
-  #   region         = "us-east-1"
+  #   region         = "eu-west-1"
   #   dynamodb_table = "cbtc-media-day-terraform-locks"
   #   encrypt        = true
   # }

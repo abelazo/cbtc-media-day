@@ -96,7 +96,7 @@ The recommended workflow for local development using `just` and LocalStack:
 
 ```bash
 # 1. Start LocalStack
-just infra::start-localstack
+just infra::localstack-start
 
 # 2. Provision shared infrastructure (S3, etc.)
 just infra::init global && just infra::apply global
