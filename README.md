@@ -1,5 +1,11 @@
 # CBTC Media Day
 
+| Pipeline | Status |
+| --- | --- |
+| Deploy | [![Deploy](https://github.com/abelazo/cbtc-media-day/actions/workflows/deploy.yml/badge.svg)](https://github.com/abelazo/cbtc-media-day/actions/workflows/deploy.yml) |
+| Infrastructure lint | [![Infrastructure](https://github.com/abelazo/cbtc-media-day/actions/workflows/lint_infra.yml/badge.svg)](https://github.com/abelazo/cbtc-media-day/actions/workflows/lint_infra.yml) |
+| Services lint | [![Services](https://github.com/abelazo/cbtc-media-day/actions/workflows/lint_services.yml/badge.svg)](https://github.com/abelazo/cbtc-media-day/actions/workflows/lint_services.yml) |
+
 A serverless AWS application built with Python 3.12 and Terraform, following Test-Driven Development (TDD) principles.
 
 ## Architecture
