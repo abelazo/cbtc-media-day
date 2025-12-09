@@ -25,18 +25,24 @@ def api_gateway_url():
 
     if not url:
         # Try to get from Terraform output
+        import pathlib
         import subprocess
+
+        # Calculate correct path relative to this file
+        current_dir = pathlib.Path(__file__).parent.absolute()
+        # project root/tests/functional -> project root/infra/services
+        infra_dir = current_dir.parent.parent / "infra" / "services"
 
         try:
             result = subprocess.run(
                 ["terraform", "output", "-raw", "api_gateway_url"],
-                cwd="../infra/services",
+                cwd=str(infra_dir),
                 capture_output=True,
                 text=True,
                 check=True,
             )
             url = result.stdout.strip()
-        except subprocess.CalledProcessError:
+        except (subprocess.CalledProcessError, FileNotFoundError):
             pytest.skip("API Gateway not deployed. Run infrastructure deployment first.")
 
     # Convert AWS URL to LocalStack format if using LocalStack
