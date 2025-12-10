@@ -4,8 +4,8 @@ name: Lint Services
 on:
   push:
     paths:
-      - 'services/**'
       - '.github/workflows/lint_services.yml'
+      - 'services/**'
 
 env:
   UV_VERSION: 0.5.0

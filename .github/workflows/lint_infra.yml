@@ -4,8 +4,8 @@ name: Lint Infrastructure
 on:
   push:
     paths:
-      - 'infra/**'
       - '.github/workflows/lint_infra.yml'
+      - 'infra/**'
 
 jobs:
   qa-infrastructure:
