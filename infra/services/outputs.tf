@@ -12,3 +12,8 @@ output "api_gateway_id" {
   description = "ID of the API Gateway REST API"
   value       = aws_api_gateway_rest_api.main.id
 }
+
+output "users_table_name" {
+  description = "Name of the users DynamoDB table"
+  value       = aws_dynamodb_table.users.name
+}

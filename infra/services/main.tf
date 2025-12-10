@@ -75,6 +75,43 @@ resource "aws_lambda_function" "content_service" {
   }
 }
 
+# DynamoDB Table for Users
+resource "aws_dynamodb_table" "users" {
+  name         = "users"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "username"
+
+  attribute {
+    name = "username"
+    type = "S"
+  }
+
+  tags = {
+    Name = "${var.project_name}-${var.environment}-users"
+  }
+}
+
+# IAM Policy for DynamoDB Access
+resource "aws_iam_role_policy" "content_lambda_dynamodb" {
+  name = "${var.project_name}-${var.environment}-content-dynamodb"
+  role = aws_iam_role.content_lambda.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "dynamodb:GetItem",
+          "dynamodb:Scan",
+          "dynamodb:PutItem"
+        ]
+        Resource = aws_dynamodb_table.users.arn
+      }
+    ]
+  })
+}
+
 # API Gateway REST API
 resource "aws_api_gateway_rest_api" "main" {
   name        = "${var.project_name}-${var.environment}-api"
