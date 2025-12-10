@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -eo pipefail
 
 echo "🔨 Building content service Lambda deployment package..."
 
@@ -54,12 +54,13 @@ echo "✅ Build complete: $DIST_DIR/$ZIP_FILE"
 if [ "$SKIP_UPLOAD" != "true" ]; then
     echo "☁️  Uploading to S3..."
 
-    # Check if AWS credentials are set
-    if [ -z "$AWS_ACCESS_KEY_ID" ]; then
-        echo "⚠️  AWS credentials not set. Setting LocalStack defaults..."
+    # Check if AWS profile is set
+    if [ -z "$AWS_PROFILE" ]; then
+        echo "⚠️  AWS profile not set. Setting LocalStack defaults..."
         export AWS_ACCESS_KEY_ID=test
         export AWS_SECRET_ACCESS_KEY=test
         export AWS_DEFAULT_REGION=eu-west-1
+        export AWS_ENDPOINT_URL=http://localhost:4566
     fi
 
     # Upload to S3

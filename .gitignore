@@ -50,6 +50,9 @@ htmlcov/
 *.tfplan
 .terraform.lock.hcl
 
+.config.dev.tfbackend
+.config.prod.tfbackend
+
 # AWS
 .aws-sam/
 

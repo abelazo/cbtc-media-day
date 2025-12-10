@@ -12,6 +12,5 @@ init env="local" +args="":
 # Clean up
 [group('init')]
 clean:
-  @echo "Cleaning up..."
   rm -rf .terraform
   rm -rf .terraform.lock.hcl
