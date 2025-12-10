@@ -9,14 +9,14 @@ on:
 
 jobs:
   qa-infrastructure:
+    name: QA Infrastructure
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         terraform_module:
           - bootstrap
           - global
           - services
-    name: QA Infrastructure
-    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -37,7 +37,7 @@ jobs:
         uses: extractions/setup-just@v3
 
       - name: Terraform init
-        run: just infra::${{ matrix.terraform_module }}::init local
+        run: just infra::${{ matrix.terraform_module }}::init local --backend=false
 
       - name: Terraform Format Check
         run: just infra::${{ matrix.terraform_module }}::fmt local
