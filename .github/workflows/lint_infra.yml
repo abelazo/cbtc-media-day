@@ -1,9 +1,6 @@
 ---
 name: Lint Infrastructure
 
-env:
-  TF_VERSION: 1.13.1
-
 on:
   push:
     paths:
@@ -11,9 +8,14 @@ on:
       - '.github/workflows/lint_infra.yml'
 
 jobs:
-
-  lint-infrastructure:
-    name: Lint Infrastructure
+  qa-infrastructure:
+    strategy:
+      matrix:
+        terraform_module:
+          - bootstrap
+          - global
+          - services
+    name: QA Infrastructure
     runs-on: ubuntu-latest
 
     steps:
@@ -23,7 +25,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: ${{ env.TF_VERSION }}
+          terraform_version: 1.13.1
 
       - name: Setup TFLint
         uses: terraform-linters/setup-tflint@v6
@@ -35,13 +37,13 @@ jobs:
         uses: extractions/setup-just@v3
 
       - name: Terraform init
-        run: just infra::init global
+        run: just infra::${{ matrix.terraform_module }}::init local
 
       - name: Terraform Format Check
-        run: just infra::fmt global
-      
+        run: just infra::${{ matrix.terraform_module }}::fmt local
+
       - name: Terraform Validate
-        run: just infra::validate global
-      
+        run: just infra::${{ matrix.terraform_module }}::validate local
+
       - name: Terraform TFLint
-        run: just infra::lint global
+        run: just infra::${{ matrix.terraform_module }}::lint local
