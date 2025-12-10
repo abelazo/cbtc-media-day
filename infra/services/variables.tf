@@ -15,3 +15,9 @@ variable "project_name" {
   type        = string
   default     = "cbtc-media-day"
 }
+
+variable "lambda_sources_bucket_name" {
+  description = "Name of the S3 bucket containing Lambda source code"
+  type        = string
+  default     = "lambda-sources-local-000000000000"
+}

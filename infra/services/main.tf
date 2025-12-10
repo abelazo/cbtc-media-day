@@ -1,18 +1,6 @@
 # Services Infrastructure
 # This file contains infrastructure for individual Lambda services
 
-# Get current AWS account ID
-
-
-# Reference global infrastructure outputs
-data "terraform_remote_state" "global" {
-  backend = "local"
-
-  config = {
-    path = "../global/terraform.tfstate"
-  }
-}
-
 # IAM role for content Lambda function
 resource "aws_iam_role" "content_lambda" {
   name = "${var.project_name}-${var.environment}-content-lambda"
@@ -60,7 +48,7 @@ resource "aws_lambda_function" "content_service" {
   timeout       = 30
   memory_size   = 128
 
-  s3_bucket = data.terraform_remote_state.global.outputs.lambda_sources_bucket_name
+  s3_bucket = var.lambda_sources_bucket_name
   s3_key    = "content_service/content_service.zip"
 
   environment {

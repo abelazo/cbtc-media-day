@@ -104,14 +104,17 @@ The recommended workflow for local development using `just` and LocalStack:
 # 1. Start LocalStack
 just infra::localstack-start
 
-# 2. Provision shared infrastructure (S3, etc.)
-just infra::init global && just infra::apply global
+# 1.1. Bootstrap localstack
+just infra::bootstrap::init local && just infra::bootstrap::apply local
+
+# 2. Provision global infrastructure (S3, etc.)
+just infra::global::init local && just infra::global::apply local
 
 # 3. Build and deploy service
-just services::content::build
+just services::build-all
 
 # 4. Provision lambda services
-just infra::init services && just infra::apply services
+just infra::services::init local && just infra::services::apply local
 
 # 5. Run functional tests
 just tests::run

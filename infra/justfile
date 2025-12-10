@@ -1,76 +1,32 @@
 # Infrastructure management recipes
 
+# Bootstrap stack
+[group('stacks')]
+mod bootstrap
+
+# Global stack
+[group('stacks')]
+mod global
+
+# Services stack
+[group('stacks')]
+mod services
+
 # Default recipe - show available commands
 help:
-    @just --list
-
-# Initialize Terraform (global stack)
-[group('init')]
-init stack="global" +args="":
-    @echo "Initializing Terraform for {{stack}} stack..."
-    cd {{stack}} && terraform init {{args}}
-    @echo "✓ Terraform initialized for {{stack}}"
-
-# Plan Terraform changes (global stack)
-[group('apply')]
-plan stack="global" +args="":
-    @echo "Planning Terraform changes for {{stack}} stack..."
-    cd {{stack}} && terraform plan {{args}}
-    @echo "✓ Plan complete for {{stack}}"
-
-# Apply Terraform changes (global stack)
-[group('apply')]
-apply stack="global" +args="":
-    @echo "Applying Terraform changes for {{stack}} stack..."
-    cd {{stack}} && terraform apply {{args}}
-    @echo "✓ Applied changes for {{stack}}"
-
-# Destroy infrastructure (with confirmation)
-[group('apply')]
-destroy stack="global":
-    @echo "⚠️  WARNING: This will destroy {{stack}} infrastructure!"
-    cd {{stack}} && terraform destroy
-    @echo "✓ Destroyed {{stack}} infrastructure"
-
-# Format Terraform files
-[group('lint')]
-fmt stack="global":
-    @echo "Formatting Terraform files for {{stack}}..."
-    cd {{stack}} && terraform fmt -recursive
-    @echo "✓ Formatted {{stack}} Terraform files"
-
-# Validate Terraform configuration
-[group('lint')]
-validate stack="global":
-    @echo "Validating Terraform for {{stack}}..."
-    cd {{stack}} && terraform validate
-    @echo "✓ Validated {{stack}} configuration"
-
-# Validate Terraform configuration
-[group('lint')]
-lint stack="global":
-    @echo "Linting Terraform for {{stack}}..."
-    cd {{stack}} && tflint --recursive
-    @echo "✓ Linted {{stack}} configuration"
+  just --list
 
 # Start LocalStack
 [group('localstack')]
 localstack-start:
-    @echo "Starting LocalStack..."
-    docker compose up -d
-    @echo "Waiting for LocalStack to be ready..."
-    sleep 5
-    @echo "✓ LocalStack started"
+  docker compose up -d
 
 # Stop LocalStack
 [group('localstack')]
 localstack-stop:
-    @echo "Stopping LocalStack..."
-    docker compose down
-    @echo "✓ LocalStack stopped"
+  docker compose down
 
 # Status LocalStack
 [group('localstack')]
 localstack-status:
-    @echo "Checking LocalStack status..."
-    docker compose ps
+  docker compose ps
