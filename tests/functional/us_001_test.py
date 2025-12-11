@@ -57,7 +57,7 @@ def api_gateway_url():
             stage = parts[3]  # Extract stage (e.g., v1)
             resource = parts[4]  # Extract resource (e.g., content)
             # Use LocalStack internal format
-            url = f"http://localhost:4566/restapis/{api_id}/{stage}/_user_request_/{resource}"
+            url = f"http://{api_id}.execute-api.localhost.localstack.cloud:4566/{stage}/{resource}"
 
     return url
 

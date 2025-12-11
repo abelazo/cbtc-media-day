@@ -30,3 +30,14 @@ localstack-stop:
 [group('localstack')]
 localstack-status:
   docker compose ps
+
+# Clean all modules
+[group('clean')]
+clean-all:
+  #!/usr/bin/env bash
+  echo "Cleaning all modules..."
+  for module in $(ls); do
+    if [ -d "$module" ]; then
+      (cd "$module" && just clean)
+    fi
+  done

@@ -14,6 +14,10 @@ plan env +args="":
 apply env +args="":
   terraform apply --var="environment={{ env }}" {{ args }}
 
+# Apply all changes
+[group('apply')]
+init-apply env +args="": (init env) (workspace env) (apply env args)
+
 # Destroy infrastructure (with confirmation)
 [group('apply')]
 destroy env:
@@ -22,15 +26,19 @@ destroy env:
 
 # Format Terraform files
 [group('lint')]
-fmt env:
+fmt:
   terraform fmt --recursive
 
 # Validate Terraform configuration
 [group('lint')]
-validate env:
+validate:
   terraform validate
 
 # Lint Terraform configuration
 [group('lint')]
-lint env:
+lint:
   tflint --recursive
+
+# Check
+[group('lint')]
+check: fmt validate lint
