@@ -1,0 +1,60 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.12, pytest-9.0.2, pluggy-1.6.0 -- /Users/abelazo/ws/personal/cbtc-media-day/.venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /Users/abelazo/ws/personal/cbtc-media-day
+configfile: pyproject.toml
+plugins: mock-3.15.1, cov-7.0.0
+collecting ... collected 6 items
+
+tests/functional/us_001_test.py::TestUS001ExampleUserStory::test_user_receives_default_greeting FAILED [ 16%]
+tests/functional/us_001_test.py::TestUS001ExampleUserStory::test_user_receives_personalized_greeting FAILED [ 33%]
+tests/functional/us_001_test.py::TestUS001ExampleUserStory::test_api_returns_proper_json_response FAILED [ 50%]
+tests/functional/us_002_test.py::TestUS002BasicAuth::test_user_receives_greeting_with_valid_credentials FAILED [ 66%]
+tests/functional/us_002_test.py::TestUS002BasicAuth::test_user_denied_access_with_invalid_credentials FAILED [ 83%]
+tests/functional/us_002_test.py::TestUS002BasicAuth::test_user_denied_access_without_credentials FAILED [100%]
+
+=================================== FAILURES ===================================
+________ TestUS001ExampleUserStory.test_user_receives_default_greeting _________
+tests/functional/us_001_test.py:77: in test_user_receives_default_greeting
+    assert response.status_code == 200
+E   assert 404 == 200
+E    +  where 404 = <Response [404]>.status_code
+______ TestUS001ExampleUserStory.test_user_receives_personalized_greeting ______
+tests/functional/us_001_test.py:90: in test_user_receives_personalized_greeting
+    assert response.status_code == 200
+E   assert 404 == 200
+E    +  where 404 = <Response [404]>.status_code
+_______ TestUS001ExampleUserStory.test_api_returns_proper_json_response ________
+tests/functional/us_001_test.py:103: in test_api_returns_proper_json_response
+    assert response.status_code == 200
+E   assert 404 == 200
+E    +  where 404 = <Response [404]>.status_code
+____ TestUS002BasicAuth.test_user_receives_greeting_with_valid_credentials _____
+tests/functional/us_002_test.py:111: in test_user_receives_greeting_with_valid_credentials
+    assert response.status_code == 200
+E   assert 404 == 200
+E    +  where 404 = <Response [404]>.status_code
+_____ TestUS002BasicAuth.test_user_denied_access_with_invalid_credentials ______
+tests/functional/us_002_test.py:124: in test_user_denied_access_with_invalid_credentials
+    assert response.status_code == 401
+E   assert 404 == 401
+E    +  where 404 = <Response [404]>.status_code
+________ TestUS002BasicAuth.test_user_denied_access_without_credentials ________
+tests/functional/us_002_test.py:132: in test_user_denied_access_without_credentials
+    assert response.status_code == 401
+E   assert 404 == 401
+E    +  where 404 = <Response [404]>.status_code
+=========================== short test summary info ============================
+FAILED tests/functional/us_001_test.py::TestUS001ExampleUserStory::test_user_receives_default_greeting - assert 404 == 200
+ +  where 404 = <Response [404]>.status_code
+FAILED tests/functional/us_001_test.py::TestUS001ExampleUserStory::test_user_receives_personalized_greeting - assert 404 == 200
+ +  where 404 = <Response [404]>.status_code
+FAILED tests/functional/us_001_test.py::TestUS001ExampleUserStory::test_api_returns_proper_json_response - assert 404 == 200
+ +  where 404 = <Response [404]>.status_code
+FAILED tests/functional/us_002_test.py::TestUS002BasicAuth::test_user_receives_greeting_with_valid_credentials - assert 404 == 200
+ +  where 404 = <Response [404]>.status_code
+FAILED tests/functional/us_002_test.py::TestUS002BasicAuth::test_user_denied_access_with_invalid_credentials - assert 404 == 401
+ +  where 404 = <Response [404]>.status_code
+FAILED tests/functional/us_002_test.py::TestUS002BasicAuth::test_user_denied_access_without_credentials - assert 404 == 401
+ +  where 404 = <Response [404]>.status_code
+============================== 6 failed in 0.35s ===============================

@@ -4,9 +4,11 @@ Functional test for US-001 Example User Story.
 This test makes actual HTTP requests to the deployed API Gateway endpoint.
 """
 
+import base64
 import json
 import os
 
+import boto3
 import pytest
 import requests
 
@@ -47,13 +49,52 @@ def api_gateway_url():
 
     # Convert AWS URL to LocalStack format if using LocalStack
     if os.getenv("AWS_ENDPOINT_URL"):
-        # Extract API ID from URL
+        # Extract API ID and stage from URL
         # Format: https://{api-id}.execute-api.{region}.amazonaws.com/{stage}/{resource}
         if "execute-api" in url and "amazonaws.com" in url:
-            api_id = url.split("//")[1].split(".")[0]
-            url = f"http://{api_id}.execute-api.localhost.localstack.cloud:4566/v1/content"
+            parts = url.split("/")
+            api_id = parts[2].split(".")[0]  # Extract API ID from domain
+            stage = parts[3]  # Extract stage (e.g., v1)
+            resource = parts[4]  # Extract resource (e.g., content)
+            # Use LocalStack internal format
+            url = f"http://localhost:4566/restapis/{api_id}/{stage}/_user_request_/{resource}"
 
     return url
+
+
+@pytest.fixture(scope="module")
+def seeded_users():
+    """
+    Seed the users table with test data.
+    """
+    endpoint_url = os.getenv("AWS_ENDPOINT_URL")
+    dynamodb = boto3.resource("dynamodb", endpoint_url=endpoint_url)
+    table = dynamodb.Table("users")
+
+    users = [
+        {"username": "ValidUser", "password": "password123"},
+        {"username": "TestUser", "password": "testpass"},
+    ]
+
+    try:
+        for user in users:
+            table.put_item(Item=user)
+    except Exception as e:
+        print(f"Warning: Could not seed table: {e}")
+
+    return users
+
+
+@pytest.fixture(scope="module")
+def auth_headers():
+    """
+    Create valid auth headers for testing.
+    """
+    username = "ValidUser"
+    password = "password123"
+    credentials = f"{username}:{password}"
+    encoded = base64.b64encode(credentials.encode()).decode()
+    return {"Authorization": f"Basic {encoded}"}
 
 
 class TestUS001ExampleUserStory:
@@ -66,12 +107,12 @@ class TestUS001ExampleUserStory:
     3. The API returns proper status codes and JSON responses
     """
 
-    def test_user_receives_default_greeting(self, api_gateway_url):
+    def test_user_receives_default_greeting(self, api_gateway_url, auth_headers, seeded_users):
         """
         AC1: User can call the API without parameters and receive a default greeting.
         """
         # Make HTTP GET request to API Gateway
-        response = requests.get(api_gateway_url)
+        response = requests.get(api_gateway_url, headers=auth_headers)
 
         # Verify response
         assert response.status_code == 200
@@ -79,12 +120,12 @@ class TestUS001ExampleUserStory:
         assert body["success"] is True
         assert body["message"] == "Hello, World!"
 
-    def test_user_receives_personalized_greeting(self, api_gateway_url):
+    def test_user_receives_personalized_greeting(self, api_gateway_url, auth_headers, seeded_users):
         """
         AC2: User can provide a name and receive a personalized greeting.
         """
         # Make HTTP GET request with query parameter
-        response = requests.get(api_gateway_url, params={"name": "TestUser"})
+        response = requests.get(api_gateway_url, params={"name": "TestUser"}, headers=auth_headers)
 
         # Verify response
         assert response.status_code == 200
@@ -92,12 +133,12 @@ class TestUS001ExampleUserStory:
         assert body["success"] is True
         assert body["message"] == "Hello, TestUser!"
 
-    def test_api_returns_proper_json_response(self, api_gateway_url):
+    def test_api_returns_proper_json_response(self, api_gateway_url, auth_headers, seeded_users):
         """
         AC3: The API returns proper status codes and JSON responses.
         """
         # Make HTTP GET request with query parameter
-        response = requests.get(api_gateway_url, params={"name": "Alice"})
+        response = requests.get(api_gateway_url, params={"name": "Alice"}, headers=auth_headers)
 
         # Verify response structure
         assert response.status_code == 200

@@ -39,8 +39,11 @@ def api_gateway_url():
 
     if os.getenv("AWS_ENDPOINT_URL"):
         if "execute-api" in url and "amazonaws.com" in url:
-            api_id = url.split("//")[1].split(".")[0]
-            url = f"http://{api_id}.execute-api.localhost.localstack.cloud:4566/v1/content"
+            parts = url.split("/")
+            api_id = parts[2].split(".")[0]
+            stage = parts[3]
+            resource = parts[4]
+            url = f"http://localhost:4566/restapis/{api_id}/{stage}/_user_request_/{resource}"
 
     return url
 
