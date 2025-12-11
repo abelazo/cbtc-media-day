@@ -97,7 +97,7 @@ def auth_headers():
     return {"Authorization": f"Basic {encoded}"}
 
 
-class TestUS001ExampleUserStory:
+class TestUS001HelloWorld:
     """
     Functional test for US-001: User can get a personalized greeting.
 

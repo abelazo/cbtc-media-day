@@ -7,7 +7,7 @@ import json
 from services.content_service.src.handler import lambda_handler
 
 
-class TestLambdaHandler:
+class TestContentServiceHandler:
     """Unit tests for the Lambda handler."""
 
     def test_handler_returns_200_with_default_name(self):
