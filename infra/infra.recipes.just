@@ -16,7 +16,7 @@ apply env +args="":
 
 # Apply all changes
 [group('apply')]
-init-apply env +args="": (init env) (workspace env) (apply env args)
+init-apply env +args="": (init env) (apply env args)
 
 # Destroy infrastructure (with confirmation)
 [group('apply')]

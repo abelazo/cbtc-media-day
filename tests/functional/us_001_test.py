@@ -72,8 +72,8 @@ def seeded_users():
     table = dynamodb.Table("users")
 
     users = [
-        {"username": "ValidUser", "password": "password123"},
-        {"username": "TestUser", "password": "testpass"},
+        {"username": "ValidUser", "dnis": ["12345678A", "87654321B"]},
+        {"username": "TestUser", "dnis": ["11111111C"]},
     ]
 
     try:
@@ -89,12 +89,13 @@ def seeded_users():
 def auth_headers():
     """
     Create valid auth headers for testing.
+    Uses DNI:Name format encoded in base64.
     """
-    username = "ValidUser"
-    password = "password123"
-    credentials = f"{username}:{password}"
+    dni = "12345678A"
+    name = "ValidUser"
+    credentials = f"{dni}:{name}"
     encoded = base64.b64encode(credentials.encode()).decode()
-    return {"Authorization": f"Basic {encoded}"}
+    return {"Authorization": encoded}
 
 
 class TestUS001HelloWorld:

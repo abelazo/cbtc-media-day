@@ -112,6 +112,97 @@ resource "aws_iam_role_policy" "content_lambda_dynamodb" {
   })
 }
 
+# ========================================
+# Authorizer Lambda
+# ========================================
+
+# IAM role for authorizer Lambda function
+resource "aws_iam_role" "authorizer_lambda" {
+  name = "${var.project_name}-${var.environment}-authorizer-lambda"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+      }
+    ]
+  })
+
+  tags = {
+    Name = "${var.project_name}-${var.environment}-authorizer-lambda"
+  }
+}
+
+# Attach basic Lambda execution policy to authorizer
+resource "aws_iam_role_policy_attachment" "authorizer_lambda_basic" {
+  role       = aws_iam_role.authorizer_lambda.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+# CloudWatch Log Group for authorizer Lambda
+resource "aws_cloudwatch_log_group" "authorizer_lambda" {
+  name              = "/aws/lambda/${var.project_name}-${var.environment}-authorizer"
+  retention_in_days = 30
+
+  tags = {
+    Name = "${var.project_name}-${var.environment}-authorizer-logs"
+  }
+}
+
+# Authorizer Lambda function
+resource "aws_lambda_function" "authorizer" {
+  function_name = "${var.project_name}-${var.environment}-authorizer"
+  role          = aws_iam_role.authorizer_lambda.arn
+  handler       = "handler.lambda_handler"
+  runtime       = "python3.12"
+  timeout       = 30
+  memory_size   = 128
+
+  s3_bucket = local.lambda_sources_bucket_name
+  s3_key    = "authorizer/authorizer.zip"
+
+  environment {
+    variables = {
+      ENVIRONMENT      = var.environment
+      USERS_TABLE_NAME = aws_dynamodb_table.users.name
+    }
+  }
+
+  depends_on = [
+    aws_cloudwatch_log_group.authorizer_lambda,
+    aws_iam_role_policy_attachment.authorizer_lambda_basic
+  ]
+
+  tags = {
+    Name = "${var.project_name}-${var.environment}-authorizer"
+  }
+}
+
+# IAM Policy for authorizer Lambda to access DynamoDB
+resource "aws_iam_role_policy" "authorizer_lambda_dynamodb" {
+  name = "${var.project_name}-${var.environment}-authorizer-dynamodb"
+  role = aws_iam_role.authorizer_lambda.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "dynamodb:GetItem"
+        ]
+        Resource = aws_dynamodb_table.users.arn
+      }
+    ]
+  })
+}
+
+
 # API Gateway REST API
 resource "aws_api_gateway_rest_api" "main" {
   name        = "${var.project_name}-${var.environment}-api"
@@ -129,12 +220,58 @@ resource "aws_api_gateway_resource" "content" {
   path_part   = "content"
 }
 
+# API Gateway Authorizer
+resource "aws_api_gateway_authorizer" "lambda_authorizer" {
+  name                   = "${var.project_name}-${var.environment}-authorizer"
+  rest_api_id            = aws_api_gateway_rest_api.main.id
+  authorizer_uri         = aws_lambda_function.authorizer.invoke_arn
+  authorizer_credentials = aws_iam_role.authorizer_invocation.arn
+  type                   = "REQUEST"
+  identity_source        = "method.request.header.Authorization"
+}
+
+# IAM role for API Gateway to invoke authorizer
+resource "aws_iam_role" "authorizer_invocation" {
+  name = "${var.project_name}-${var.environment}-authorizer-invocation"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "apigateway.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+# IAM policy for API Gateway to invoke authorizer Lambda
+resource "aws_iam_role_policy" "authorizer_invocation" {
+  name = "${var.project_name}-${var.environment}-authorizer-invocation"
+  role = aws_iam_role.authorizer_invocation.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = "lambda:InvokeFunction"
+        Resource = aws_lambda_function.authorizer.arn
+      }
+    ]
+  })
+}
+
 # API Gateway GET method for /content
 resource "aws_api_gateway_method" "content_get" {
   rest_api_id   = aws_api_gateway_rest_api.main.id
   resource_id   = aws_api_gateway_resource.content.id
   http_method   = "GET"
-  authorization = "NONE"
+  authorization = "CUSTOM"
+  authorizer_id = aws_api_gateway_authorizer.lambda_authorizer.id
 }
 
 # Lambda integration for GET /content
@@ -165,6 +302,7 @@ resource "aws_api_gateway_deployment" "v1" {
       aws_api_gateway_resource.content.id,
       aws_api_gateway_method.content_get.id,
       aws_api_gateway_integration.content_lambda.id,
+      aws_api_gateway_authorizer.lambda_authorizer.id,
     ]))
   }
 
