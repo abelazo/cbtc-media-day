@@ -74,10 +74,11 @@ def users_table():
 def seeded_users(users_table):
     """
     Seed the users table with test data.
+    Uses DNI:Name authentication format.
     """
     users = [
-        {"username": "ValidUser", "password": "password123"},
-        {"username": "AnotherUser", "password": "secret_password"},
+        {"username": "ValidUser", "dnis": ["12345678A", "87654321B"]},
+        {"username": "AnotherUser", "dnis": ["11111111C", "22222222D"]},
     ]
 
     try:
@@ -89,48 +90,49 @@ def seeded_users(users_table):
     return users
 
 
-def get_basic_auth_header(username, password):
-    """Create Basic Auth header value."""
-    credentials = f"{username}:{password}"
+def get_dni_auth_header(dni, username):
+    """Create DNI:Name auth header value."""
+    credentials = f"{dni}:{username}"
     encoded_credentials = base64.b64encode(credentials.encode()).decode()
-    return f"Basic {encoded_credentials}"
+    return encoded_credentials
 
 
-@pytest.mark.skip
 class TestUS002BasicAuth:
     """
-    Functional test for US-002: Basic Authentication.
+    Functional test for US-002: DNI Authentication.
     """
 
     def test_user_receives_greeting_with_valid_credentials(self, api_gateway_url, seeded_users):
         """
-        Scenario: User receives greeting with valid credentials
+        Scenario: User receives greeting with valid DNI credentials
         """
+        dni = "12345678A"
         username = "ValidUser"
-        password = "password123"
-        headers = {"Authorization": get_basic_auth_header(username, password)}
+        headers = {"Authorization": get_dni_auth_header(dni, username)}
 
         response = requests.get(api_gateway_url, headers=headers)
 
         assert response.status_code == 200
         assert response.json().get("success") is True
 
+    @pytest.mark.skip("Not supported by LocalStack")
     def test_user_denied_access_with_invalid_credentials(self, api_gateway_url):
         """
-        Scenario: User denied access with invalid credentials
+        Scenario: User denied access with invalid DNI credentials
         """
-        username = "InvalidUser"
-        password = "wrongpassword"
-        headers = {"Authorization": get_basic_auth_header(username, password)}
+        dni = "99999999Z"  # Invalid DNI not in any user's dnis list
+        username = "InvalidUser"  # User doesn't exist
+        headers = {"Authorization": get_dni_auth_header(dni, username)}
 
         response = requests.get(api_gateway_url, headers=headers)
 
-        assert response.status_code == 401
+        assert response.status_code == 403  # API Gateway returns 403 for authorization failures
 
+    @pytest.mark.skip("Not supported by LocalStack")
     def test_user_denied_access_without_credentials(self, api_gateway_url):
         """
         Scenario: User denied access without credentials
         """
         response = requests.get(api_gateway_url)
 
-        assert response.status_code == 401
+        assert response.status_code == 403  # API Gateway returns 403 for authorization failures
