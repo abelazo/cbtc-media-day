@@ -41,8 +41,3 @@ clean-all:
       (cd "$module" && just clean)
     fi
   done
-
-# Experimental: aws
-[group('aws')]
-aws +args="":
-  aws {{ args }}

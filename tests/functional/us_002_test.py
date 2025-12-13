@@ -115,7 +115,7 @@ class TestUS002BasicAuth:
         assert response.status_code == 200
         assert response.json().get("success") is True
 
-    @pytest.mark.skip("Not supported by LocalStack")
+    @pytest.mark.skip("Not supported by LocalStack Community")
     def test_user_denied_access_with_invalid_credentials(self, api_gateway_url):
         """
         Scenario: User denied access with invalid DNI credentials
@@ -128,7 +128,7 @@ class TestUS002BasicAuth:
 
         assert response.status_code == 403  # API Gateway returns 403 for authorization failures
 
-    @pytest.mark.skip("Not supported by LocalStack")
+    @pytest.mark.skip("Not supported by LocalStack Community")
     def test_user_denied_access_without_credentials(self, api_gateway_url):
         """
         Scenario: User denied access without credentials
