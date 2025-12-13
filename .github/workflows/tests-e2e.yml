@@ -9,8 +9,8 @@ on:
 jobs:
   e2e-tests:
     runs-on: ubuntu-latest
-    env:
-      LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
+    #env:
+    #  LOCALSTACK_AUTH_TOKEN: ${{ secrets.LOCALSTACK_AUTH_TOKEN }}
 
     steps:
       - name: Checkout code
