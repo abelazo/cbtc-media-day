@@ -87,6 +87,32 @@ jobs:
           just infra::services::init local
           just infra::services::apply local --auto-approve
 
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install Frontend Dependencies
+        run: just app::install
+
+      - name: Start Frontend
+        run: |
+          # Get API Gateway URL from Terraform
+          cd infra/services
+          API_URL=$(terraform output -raw api_gateway_url)
+          echo "API URL: $API_URL"
+
+          # Start frontend in background with correct API URL
+          cd ../..
+          export VITE_API_URL=$API_URL
+          # Run directly with bun to detach easily or use nohup
+          # just app::dev runs "bun run dev"
+          cd app
+          nohup bun run dev > frontend.log 2>&1 &
+
+          # Wait for server to be ready
+          bun x wait-on tcp:5173 --timeout 30000
+
       - name: Run Functional Tests
         env:
           AWS_ACCESS_KEY_ID: test
