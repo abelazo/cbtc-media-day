@@ -1,0 +1,14 @@
+[build]
+  command = "bun run build"
+  publish = "dist"
+
+[dev]
+  command = "bun run dev"
+  port = 5173
+
+# Context-specific configuration
+[context.production]
+  environment = { VITE_API_URL = "REPLACE_WITH_PROD_API_URL" }
+
+[context.deploy-preview]
+  environment = { VITE_API_URL = "REPLACE_WITH_STAGING_API_URL" }

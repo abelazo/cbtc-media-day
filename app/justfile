@@ -1,0 +1,24 @@
+
+# Install dependencies
+install:
+  bun install
+
+# Run development server
+dev:
+  bun run dev
+
+# Build for production
+build:
+  bun run build
+
+# Run unit tests
+test:
+  bun test --preload ./src/setupTests.js
+
+# Run unit tests with watch mode
+test-watch:
+  bun test --watch
+
+# Lint code
+lint:
+  bun run lint

@@ -11,6 +11,10 @@ mod services
 [group('tests')]
 mod tests
 
+# Frontend Application
+[group('app')]
+mod app
+
 # Default recipe - show available commands
 help:
     @just --list

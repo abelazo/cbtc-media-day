@@ -63,7 +63,9 @@ Each User Story is documented in `/docs/user_stories/<user_story_id>.md` with:
 
 - **Runtime**: Python 3.12 (AWS Lambda)
 - **Infrastructure**: Terraform (IaC)
-- **Package Manager**: uv (fast Python package installer)
+- **Frontend**: React (Vite)
+- **Frontend Runtime**: Bun
+- **Package Manager**: uv (Python) / bun (JS)
 - **Testing**: pytest
 - **Linting**: ruff
 - **Formatting**: black
@@ -75,6 +77,7 @@ Each User Story is documented in `/docs/user_stories/<user_story_id>.md` with:
 
 - Python 3.12
 - [uv](https://docs.astral.sh/uv/) - Fast Python package installer
+- [Bun](https://bun.sh/) - JavaScript runtime and package manager
 - Terraform >= 1.31.1
 - AWS CLI configured
 - Docker and docker-compose (for LocalStack testing)
@@ -119,7 +122,11 @@ just infra::services::init local && just infra::services::apply local
 # 5. Run functional tests
 just tests::run
 
-# 6. Manual Verification
+# 6. Launch Frontend Locally
+just app::install
+just app::dev
+
+# 7. Manual Verification
 # Replace <API_GW_ID> with the output from 'terraform output -raw api_gateway_id' in infra/services
 curl -s http://<API_GW_ID>.execute-api.localhost.localstack.cloud:4566/v1/content
 ```
@@ -142,6 +149,9 @@ just services::<service_name>::lint
 
 # Terraform formatting
 just infra::lint
+
+# Frontend linting
+just app::lint
 ```
 
 ## CI/CD Overview
