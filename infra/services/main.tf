@@ -303,6 +303,8 @@ resource "aws_api_gateway_deployment" "v1" {
       aws_api_gateway_method.content_get.id,
       aws_api_gateway_integration.content_lambda.id,
       aws_api_gateway_authorizer.lambda_authorizer.id,
+      aws_api_gateway_method.content_options.id,
+      aws_api_gateway_integration.content_options.id,
     ]))
   }
 

@@ -12,77 +12,7 @@ import boto3
 import pytest
 import requests
 
-
 # TODO: Review a better implementation (e.g. based on environment variables)
-@pytest.fixture(scope="module")
-def api_gateway_url():
-    """
-    Get the API Gateway URL from environment or Terraform output.
-
-    Returns:
-        str: The base URL for the API Gateway endpoint
-    """
-    # Check if URL is provided via environment variable
-    url = os.getenv("API_GATEWAY_URL")
-
-    if not url:
-        # Try to get from Terraform output
-        import pathlib
-        import subprocess
-
-        # Calculate correct path relative to this file
-        current_dir = pathlib.Path(__file__).parent.absolute()
-        # project root/tests/functional -> project root/infra/services
-        infra_dir = current_dir.parent.parent / "infra" / "services"
-
-        try:
-            result = subprocess.run(
-                ["terraform", "output", "-raw", "api_gateway_url"],
-                cwd=str(infra_dir),
-                capture_output=True,
-                text=True,
-                check=True,
-            )
-            url = result.stdout.strip()
-        except (subprocess.CalledProcessError, FileNotFoundError):
-            pytest.skip("API Gateway not deployed. Run infrastructure deployment first.")
-
-    # Convert AWS URL to LocalStack format if using LocalStack
-    if os.getenv("AWS_ENDPOINT_URL"):
-        # Extract API ID and stage from URL
-        # Format: https://{api-id}.execute-api.{region}.amazonaws.com/{stage}/{resource}
-        if "execute-api" in url and "amazonaws.com" in url:
-            parts = url.split("/")
-            api_id = parts[2].split(".")[0]  # Extract API ID from domain
-            stage = parts[3]  # Extract stage (e.g., v1)
-            resource = parts[4]  # Extract resource (e.g., content)
-            # Use LocalStack internal format
-            url = f"http://{api_id}.execute-api.localhost.localstack.cloud:4566/{stage}/{resource}"
-
-    return url
-
-
-@pytest.fixture(scope="module")
-def seeded_users():
-    """
-    Seed the users table with test data.
-    """
-    endpoint_url = os.getenv("AWS_ENDPOINT_URL")
-    dynamodb = boto3.resource("dynamodb", endpoint_url=endpoint_url)
-    table = dynamodb.Table("users")
-
-    users = [
-        {"username": "ValidUser", "dnis": ["12345678A", "87654321B"]},
-        {"username": "TestUser", "dnis": ["11111111C"]},
-    ]
-
-    try:
-        for user in users:
-            table.put_item(Item=user)
-    except Exception as e:
-        print(f"Warning: Could not seed table: {e}")
-
-    return users
 
 
 @pytest.fixture(scope="module")
