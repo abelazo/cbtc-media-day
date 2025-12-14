@@ -97,16 +97,24 @@ jobs:
 
       - name: Start Frontend
         run: |
-          # Get API Gateway URL from Terraform
+          # Get API Gateway ID from Terraform
           cd infra/services
-          API_URL=$(terraform output -raw api_gateway_url)
-          echo "API URL: $API_URL"
+          API_ID=$(terraform output -raw api_gateway_id)
+          echo "API ID: $API_ID"
 
-          # Start frontend in background with correct API URL
+          # Construct LocalStack path-style URL
+          # http://localhost:4566/restapis/{api_id}/{stage}/_user_request_
+          # Assuming stage is v1
+          LOCAL_API_URL="http://localhost:4566/restapis/$API_ID/v1/_user_request_"
+
+          # Export to GITHUB_ENV for subsequent steps
+          echo "VITE_API_URL=$LOCAL_API_URL" >> $GITHUB_ENV
+
+          echo "Starting Frontend with API URL: $LOCAL_API_URL"
+
+          # Start frontend in background
           cd ../..
-          export VITE_API_URL=$API_URL
-          # Run directly with bun to detach easily or use nohup
-          # just app::dev runs "bun run dev"
+          export VITE_API_URL=$LOCAL_API_URL
           cd app
           nohup bun run dev > frontend.log 2>&1 &
 
@@ -114,13 +122,54 @@ jobs:
           bun x wait-on tcp:5173 --timeout 30000
 
       - name: Run Functional Tests
+        id: functional-tests
         env:
           AWS_ACCESS_KEY_ID: test
           AWS_SECRET_ACCESS_KEY: test
           AWS_DEFAULT_REGION: eu-west-1
           AWS_ENDPOINT_URL: http://localhost:4566
+          VITE_API_URL: ${{ env.VITE_API_URL }}
         run: |
-          just tests::run
+          # Run tests and capture output, allow failure to process it
+          set +e
+          just tests::run > test_output.txt 2>&1
+          EXIT_CODE=$?
+          set -e
+
+          # Print output for logs
+          cat test_output.txt
+
+          if [ $EXIT_CODE -eq 0 ]; then
+            echo "result=success" >> $GITHUB_OUTPUT
+          else
+            echo "result=failure" >> $GITHUB_OUTPUT
+            exit $EXIT_CODE
+          fi
+
+      - name: Publish Test Report
+        if: always()
+        run: |
+          # Parse output and generate Markdown summary
+          python3 -c "
+          import re
+          import os
+
+          summary_path = os.environ.get('GITHUB_STEP_SUMMARY')
+          if summary_path and os.path.exists('test_output.txt'):
+              with open(summary_path, 'a') as report:
+                  report.write('## Functional Test Results\n')
+                  report.write('| User Story | Test Case | Result |\n')
+                  report.write('| :--- | :--- | :--- |\n')
+
+                  with open('test_output.txt', 'r') as f:
+                      for line in f:
+                          m = re.search(r'(us_\d+)_test\.py::(\w+)::([\w\[\]]+)\s+(PASSED|FAILED|SKIPPED|XFAIL|XPASS)', line)
+                          if m:
+                              us, cls, test, status = m.groups()
+                              us_fmt = us.upper().replace('_', '-')
+                              icon = '✅' if status == 'PASSED' or status == 'XPASS' else '❌' if status == 'FAILED' else '⚠️'
+                              report.write(f'| {us_fmt} | {test} | {icon} {status} |\n')
+          "
 
       - name: Stop LocalStack
         if: always()
