@@ -46,7 +46,7 @@ def setup_data(s3_client, dynamodb_client):
     unique_id = str(uuid.uuid4())
     s3_key = f"{user_name}/photo_{unique_id}.jpg"
     file_content = b"This is a test image content."
-    username_key = f"{user_dni}/{user_name}"
+    username_key = f"{user_dni}:{user_name}"
 
     # Bucket and Table names should be available from environment or outputs
     # For now assuming standard naming or provided via env_vars/config

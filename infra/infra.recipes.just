@@ -24,6 +24,11 @@ destroy env:
   @echo "⚠️  WARNING: This will destroy infrastructure!"
   terraform destroy --var="environment={{ env }}"
 
+# Output
+[group('apply')]
+output env +args="":
+  terraform output
+
 # Format Terraform files
 [group('lint')]
 fmt:
