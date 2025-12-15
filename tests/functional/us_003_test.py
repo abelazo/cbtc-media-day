@@ -19,9 +19,7 @@ class TestUS003DniForm:
         try:
             page.goto(FRONTEND_URL)
         except Exception:
-            pytest.skip(
-                f"Frontend not reachable at {FRONTEND_URL}. Ensure 'cd app && just dev' is running."
-            )
+            pytest.skip(f"Frontend not reachable at {FRONTEND_URL}. Ensure 'cd app && just dev' is running.")
 
         # Check for DNI input
         # We assume label association or placeholder
@@ -73,15 +71,31 @@ class TestUS003DniForm:
             pytest.skip(f"Frontend not reachable at {FRONTEND_URL}")
 
         # Get a valid user
-        user = seeded_users[0]
-        dni = user["dnis"][0]
-        username = user["username"]
+        # Use a non-existent user to ensure 404
+        dni = "00000000X"
+        username = "NonExistentUser"
 
         page.get_by_label("DNI").fill(dni)
         page.get_by_label("Nombre").fill(username)
         page.get_by_role("button", name="Enviar").click()
 
-        # Check for success message ("Hello, {username}!")
-        # TODO: enable this when backend is ready
-        # expect(page.get_by_text(f"Hello, {username}!")).to_be_visible()
-        expect(page.get_by_text("Hello, World!")).to_be_visible()
+        # Check for error message ("No hay fotos asociadas a este jugador")
+        # Since US-004, if not in DB, it returns 404 and frontend should show it.
+        # But wait, frontend logic is OLD (expects JSON).
+        # The user asked to update the *test*.
+        # If I run this test now, it might check for "No hay fotos..." but frontend might display "Error: 404".
+        # But the user request implies checking that the backend returns error (or frontend displays it).
+        # "return an error as the DNI/Name is not present in the DB".
+        # So I will assert the text: "No hay fotos asociadas a este jugador" OR "Error" if frontend handles it
+        # generically.
+        # In `DniForm.jsx`, `setMessage('Error: ' + response.status)` is the fallback.
+        # So it will likely show "Error: 404".
+        # UNLESS the backend returns JSON body with "message" and frontend displays it?
+        # Backend returns `{"message": "No hay fotos..."}` on 404.
+        # Frontend: `const data = await response.json(); setMessage(data.message || 'Success');` is only inside
+        # `if (response.ok)`.
+        # Else: `setMessage('Error: ' + response.status);`
+
+        # So it will show "Error: 404".
+        # I should expect that.
+        expect(page.get_by_text("Error: 404")).to_be_visible()

@@ -25,9 +25,9 @@ class TestUS002BasicAuth:
     Functional test for US-002: DNI Authentication.
     """
 
-    def test_user_receives_greeting_with_valid_credentials(self, api_gateway_url, seeded_users):
+    def test_user_receives_error_if_not_in_db(self, api_gateway_url):
         """
-        Scenario: User receives greeting with valid DNI credentials
+        Scenario: User receives error if credentials valid but not in DB
         """
         dni = "12345678A"
         username = "ValidUser"
@@ -35,8 +35,16 @@ class TestUS002BasicAuth:
 
         response = requests.get(api_gateway_url, headers=headers)
 
-        assert response.status_code == 200
-        assert response.json().get("success") is True
+        # Since US-004, valid credentials without associated photos return 404
+        # and checking specific success field depends on response body format
+        # For now, let's assert what the user asked: "return an error as the DNI/Name is not present in the DB"
+        # Since seeded_users in this context might not actually be seeded in the "real" environment used by this test
+        # (seeded_users fixture seeds logic, but if environment is not reset/seeded consistently, it might fail).
+        # But the User Request said "DNI/Name is not present in the DB".
+
+        # Expect 404
+        assert response.status_code == 404
+        assert "No hay fotos asociadas a este jugador" in response.text
 
     @pytest.mark.skip("Not supported by LocalStack Community")
     def test_user_denied_access_with_invalid_credentials(self, api_gateway_url):

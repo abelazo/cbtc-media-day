@@ -61,7 +61,9 @@ resource "aws_lambda_function" "content_service" {
 
   environment {
     variables = {
-      ENVIRONMENT = var.environment
+      ENVIRONMENT         = var.environment
+      USERS_TABLE_NAME    = aws_dynamodb_table.users.name
+      CONTENT_BUCKET_NAME = "${var.project_name}-${var.environment}-content"
     }
   }
 
@@ -107,6 +109,39 @@ resource "aws_iam_role_policy" "content_lambda_dynamodb" {
           "dynamodb:PutItem"
         ]
         Resource = aws_dynamodb_table.users.arn
+      }
+    ]
+  })
+}
+
+# ========================================
+# Content Bucket (S3)
+# ========================================
+resource "aws_s3_bucket" "content" {
+  bucket = "${var.project_name}-${var.environment}-content"
+
+  # Force destroy for easier cleanup in dev/local
+  force_destroy = var.environment == "local" ? true : false
+
+  tags = {
+    Name = "${var.project_name}-${var.environment}-content"
+  }
+}
+
+# IAM Policy for Content Lambda to Access S3
+resource "aws_iam_role_policy" "content_lambda_s3" {
+  name = "${var.project_name}-${var.environment}-content-s3"
+  role = aws_iam_role.content_lambda.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject"
+        ]
+        Resource = "${aws_s3_bucket.content.arn}/*"
       }
     ]
   })
@@ -168,8 +203,9 @@ resource "aws_lambda_function" "authorizer" {
 
   environment {
     variables = {
-      ENVIRONMENT      = var.environment
-      USERS_TABLE_NAME = aws_dynamodb_table.users.name
+      ENVIRONMENT         = var.environment
+      USERS_TABLE_NAME    = aws_dynamodb_table.users.name
+      CONTENT_BUCKET_NAME = "${var.project_name}-${var.environment}-content"
     }
   }
 
