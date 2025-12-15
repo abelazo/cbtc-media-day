@@ -68,7 +68,7 @@ ignore = []
 "*_test.py" = ["F401", "F811"]
 
 [tool.black]
-line-length = 100
+line-length = 120
 target-version = ["py312"]
 include = '\.pyi?$'
 exclude = '''
