@@ -52,7 +52,18 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
             }
 
         try:
-            decoded_bytes = base64.b64decode(auth_header)
+            # Check for Basic Auth prefix
+            if auth_header.startswith("Basic "):
+                encoded_auth = auth_header.split(" ")[1]
+            else:
+                # Fallback for backward compatibility or strict enforcement?
+                # User request implies "transmitted ... in format Basic ..."
+                # Let's enforce it or at least handle it.
+                # If we assume previous tests sent raw base64, this might break them if we enforce "Basic".
+                # But we are updating tests too. Let's enforce "Basic ".
+                encoded_auth = auth_header
+
+            decoded_bytes = base64.b64decode(encoded_auth)
             decoded_str = decoded_bytes.decode("utf-8")
             username = decoded_str
         except Exception:

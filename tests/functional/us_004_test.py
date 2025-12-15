@@ -18,7 +18,7 @@ import requests
 def create_auth_header(dni: str, name: str) -> dict:
     credentials = f"{dni}:{name}"
     encoded = base64.b64encode(credentials.encode()).decode()
-    return {"Authorization": encoded}
+    return {"Authorization": f"Basic {encoded}"}
 
 
 @pytest.fixture(scope="module")

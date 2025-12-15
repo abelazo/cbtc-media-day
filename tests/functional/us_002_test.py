@@ -17,7 +17,7 @@ def get_dni_auth_header(dni, username):
     """Create DNI:Name auth header value."""
     credentials = f"{dni}:{username}"
     encoded_credentials = base64.b64encode(credentials.encode()).decode()
-    return encoded_credentials
+    return f"Basic {encoded_credentials}"
 
 
 class TestUS002BasicAuth:

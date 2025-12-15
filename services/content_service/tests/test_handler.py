@@ -33,7 +33,7 @@ class TestContentServiceHandler:
         name = "TestUser"
         credentials = f"{dni}:{name}"
         encoded_auth = base64.b64encode(credentials.encode()).decode()
-        event = {"headers": {"Authorization": encoded_auth}}
+        event = {"headers": {"Authorization": f"Basic {encoded_auth}"}}
         context = {}
 
         # Mock DynamoDB response
@@ -74,7 +74,7 @@ class TestContentServiceHandler:
         """
         credentials = "87654321B:NoPhoto"
         encoded_auth = base64.b64encode(credentials.encode()).decode()
-        event = {"headers": {"Authorization": encoded_auth}}
+        event = {"headers": {"Authorization": f"Basic {encoded_auth}"}}
         context = {}
 
         mock_dynamo = MagicMock()
@@ -96,7 +96,7 @@ class TestContentServiceHandler:
         """US-004: Handle DynamoDB error."""
         credentials = "Error:User"
         encoded_auth = base64.b64encode(credentials.encode()).decode()
-        event = {"headers": {"Authorization": encoded_auth}}
+        event = {"headers": {"Authorization": f"Basic {encoded_auth}"}}
 
         mock_dynamo = MagicMock()
         mock_boto_resource.return_value = mock_dynamo

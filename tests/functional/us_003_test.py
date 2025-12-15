@@ -61,7 +61,6 @@ class TestUS003DniForm:
         # But we verify no crash
         submit_button.click()
 
-    @pytest.mark.skip("Wrong Auth header format")
     def test_user_receives_greeting_from_backend(self, page: Page, seeded_users):
         """
         Scenario: User receives feedback after submission (E2E)

@@ -12,7 +12,7 @@ export default function DniForm() {
 
         try {
             const apiUrl = import.meta.env.VITE_API_URL || '';
-            const credentials = btoa(`${dni}:${nombre}`);
+            const credentials = `Basic ${btoa(`${dni}:${nombre}`)}`;
 
             const response = await fetch(`${apiUrl}/content`, {
                 headers: {
