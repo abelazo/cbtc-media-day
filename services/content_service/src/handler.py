@@ -26,7 +26,6 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
     logger.info(f"Received event: {json.dumps(event)}")
 
     try:
-        # Example business logic
         query_params = event.get("queryStringParameters") or {}
         name = query_params.get("name", "World")
         message = f"Hello, {name}!"
