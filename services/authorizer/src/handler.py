@@ -93,10 +93,12 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
         IAM policy document (Allow or Deny)
     """
     method_arn = event.get("methodArn", "")
-    headers = event.get("headers", {})
 
-    # Get authorization header (case-insensitive)
-    auth_header = headers.get("authorization") or headers.get("Authorization")
+    # Get authorization header
+    auth_header = event.get("authorizationToken")
+    # Remove 'Basic' prefix if present
+    if auth_header.startswith("Basic "):
+        auth_header = auth_header[6:]
 
     if not auth_header:
         logger.warning("Missing authorization header")

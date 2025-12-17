@@ -7,7 +7,7 @@ help:
 # Initialize Terraform (global stack)
 [group('init')]
 init env="local" +args="":
-  terraform init --backend-config=.config.{{env}}.tfbackend {{args}}
+  terraform init --reconfigure --backend-config=.config.{{env}}.tfbackend {{args}}
 
 # Clean up
 [group('init')]
