@@ -1,4 +1,3 @@
-
 # API Gateway OPTIONS method for /content (CORS)
 resource "aws_api_gateway_method" "content_options" {
   rest_api_id   = aws_api_gateway_rest_api.main.id

@@ -35,22 +35,22 @@ export default function DniForm() {
     return (
         <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: '1rem' }}>
-                <label htmlFor="dni" style={{ display: 'block', marginBottom: '0.5rem' }}>DNI</label>
-                <input
-                    id="dni"
-                    type="text"
-                    value={dni}
-                    onChange={(e) => setDni(e.target.value)}
-                    style={{ padding: '0.5rem', width: '100%' }}
-                />
-            </div>
-            <div style={{ marginBottom: '1rem' }}>
                 <label htmlFor="nombre" style={{ display: 'block', marginBottom: '0.5rem' }}>Nombre</label>
                 <input
                     id="nombre"
                     type="text"
                     value={nombre}
                     onChange={(e) => setNombre(e.target.value)}
+                    style={{ padding: '0.5rem', width: '100%' }}
+                />
+            </div>
+            <div style={{ marginBottom: '1rem' }}>
+                <label htmlFor="dni" style={{ display: 'block', marginBottom: '0.5rem' }}>DNI</label>
+                <input
+                    id="dni"
+                    type="text"
+                    value={dni}
+                    onChange={(e) => setDni(e.target.value)}
                     style={{ padding: '0.5rem', width: '100%' }}
                 />
             </div>
