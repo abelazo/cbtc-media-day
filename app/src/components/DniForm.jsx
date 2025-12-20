@@ -29,11 +29,8 @@ export default function DniForm() {
                 setMessage('Error (' + response.status + ') :' + response.statusText);
             }
         } catch (error) {
-            if (error.response.status === 403) {
-                setMessage('El DNI no está asociado al nombre proporcionado');
-            }
             console.error(error);
-            setMessage('Error de comunicación');
+            setMessage('No se puede verificar la relación entre el DNI y el nombre proporcionado');
         }
     };
 
