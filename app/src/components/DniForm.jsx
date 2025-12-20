@@ -8,7 +8,7 @@ export default function DniForm() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setMessage('Processing...');
+        setMessage('Procesando...');
 
         try {
             const apiUrl = import.meta.env.VITE_API_URL || '';
@@ -22,13 +22,15 @@ export default function DniForm() {
 
             if (response.ok) {
                 const data = await response.json();
-                setMessage(data.message || 'Success');
+                setMessage(data.message || 'OK');
+            } else if (response.status === 404) {
+                setMessage('Error (' + response.status + ') : No hay fotos asociadas a este jugador');
             } else {
-                setMessage('Error: ' + response.status);
+                setMessage('Error (' + response.status + ') :' + response.statusText);
             }
         } catch (error) {
             console.error(error);
-            setMessage('Network Error');
+            setMessage('Error de red');
         }
     };
 

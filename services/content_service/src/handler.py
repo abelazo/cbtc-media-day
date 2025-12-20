@@ -85,7 +85,7 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
             return {
                 "statusCode": 404,
                 "headers": headers,
-                "body": json.dumps({"message": "No hay fotos asociadas a este jugador", "success": False}),
+                "body": json.dumps({"message": "No photos associated to this player", "success": False}),
             }
 
         # 3. Get S3 Object
