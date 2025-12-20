@@ -23,7 +23,7 @@ class TestAuthorizerHandler:
         event = {
             "type": "REQUEST",
             "methodArn": "arn:aws:execute-api:us-east-1:123456789012:abcdef123/test/GET/resource",
-            "headers": {"authorization": encoded_auth},
+            "authorizationToken": f"Basic {encoded_auth}",
         }
         context = {}
 
@@ -51,7 +51,7 @@ class TestAuthorizerHandler:
         event = {
             "type": "REQUEST",
             "methodArn": "arn:aws:execute-api:us-east-1:123456789012:abcdef123/test/GET/resource",
-            "headers": {"authorization": encoded_auth},
+            "authorizationToken": f"Basic {encoded_auth}",
         }
         context = {}
 
@@ -72,13 +72,13 @@ class TestAuthorizerHandler:
         # Arrange
         dni = "12345678A"
         name = "UnknownUser"
-        auth_string = f"{dni}:{name}"
+        auth_string = f"Basic {dni}:{name}"
         encoded_auth = base64.b64encode(auth_string.encode()).decode()
 
         event = {
             "type": "REQUEST",
             "methodArn": "arn:aws:execute-api:us-east-1:123456789012:abcdef123/test/GET/resource",
-            "headers": {"authorization": encoded_auth},
+            "authorizationToken": f"Basic {encoded_auth}",
         }
         context = {}
 
@@ -102,7 +102,7 @@ class TestAuthorizerHandler:
         event = {
             "type": "REQUEST",
             "methodArn": "arn:aws:execute-api:us-east-1:123456789012:abcdef123/test/GET/resource",
-            "headers": {"authorization": encoded_auth},
+            "authorizationToken": f"Basic {encoded_auth}",
         }
         context = {}
 
@@ -136,7 +136,7 @@ class TestAuthorizerHandler:
         event = {
             "type": "REQUEST",
             "methodArn": "arn:aws:execute-api:us-east-1:123456789012:abcdef123/test/GET/resource",
-            "headers": {"authorization": "Not-Valid-Base64!!!"},
+            "authorizationToken": "Basic Not-Valid-Base64!!!",
         }
         context = {}
 
@@ -159,7 +159,7 @@ class TestAuthorizerHandler:
         event = {
             "type": "REQUEST",
             "methodArn": "arn:aws:execute-api:us-east-1:123456789012:abcdef123/test/GET/resource",
-            "headers": {"authorization": encoded_auth},
+            "authorizationToken": f"Basic {encoded_auth}",
         }
         context = {}
 

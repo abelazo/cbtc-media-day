@@ -89,7 +89,7 @@ class TestContentServiceHandler:
 
         assert response["statusCode"] == 404
         body = json.loads(response["body"])
-        assert body["message"] == "No hay fotos asociadas a este jugador"
+        assert body["message"] == "No photos associated to this player"
 
     @patch("boto3.resource")
     def test_us004_dynamodb_error(self, mock_boto_resource, mock_env_vars):
