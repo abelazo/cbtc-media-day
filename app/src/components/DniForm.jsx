@@ -25,12 +25,13 @@ export default function DniForm() {
                 setMessage(data.message || 'OK');
             } else if (response.status === 404) {
                 setMessage('Error (' + response.status + ') : No hay fotos asociadas a este jugador');
-            } else if (response.status === 403) {
-                setMessage('Error (' + response.status + ') : El DNI no está asociado al nombre proporcionado');
             } else {
                 setMessage('Error (' + response.status + ') :' + response.statusText);
             }
         } catch (error) {
+            if (error.response.status === 403) {
+                setMessage('El DNI no está asociado al nombre proporcionado');
+            }
             console.error(error);
             setMessage('Error de comunicación');
         }
