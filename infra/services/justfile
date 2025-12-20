@@ -14,3 +14,11 @@ init env="local" +args="":
 clean:
   rm -rf .terraform
   rm -rf .terraform.lock.hcl
+
+# Force lambda deployment
+[group('deploy')]
+deploy-lambda function bucket key:
+  aws lambda update-function-code \
+    --function-name {{ function }} \
+    --s3-bucket {{ bucket }} \
+    --s3-key {{ key }}

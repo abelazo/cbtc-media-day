@@ -32,8 +32,9 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
     logger.info(f"Received event: {json.dumps(event)}")
 
     # CORS headers
+    app_url = _get_env_var("CBTC_APP_URL")
     headers = {
-        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Origin": app_url,
         "Content-Type": "application/json",
     }
 

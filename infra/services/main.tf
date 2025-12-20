@@ -64,6 +64,7 @@ resource "aws_lambda_function" "content_service" {
       ENVIRONMENT         = var.environment
       USERS_TABLE_NAME    = aws_dynamodb_table.users.name
       CONTENT_BUCKET_NAME = "${var.project_name}-${var.environment}-content"
+      CBTC_APP_URL        = var.app_url
     }
   }
 

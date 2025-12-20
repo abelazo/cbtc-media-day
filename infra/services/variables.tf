@@ -21,3 +21,8 @@ variable "lambda_sources_bucket_prefix" {
   type        = string
   default     = "lambda-sources"
 }
+
+variable "app_url" {
+  description = "URL of the CBTC app"
+  type        = string
+}
