@@ -15,7 +15,14 @@ from services.content_service.src.handler import lambda_handler
 @pytest.fixture
 def mock_env_vars():
     """Mock environment variables."""
-    with patch.dict(os.environ, {"USERS_TABLE_NAME": "test-users", "CONTENT_BUCKET_NAME": "test-bucket"}):
+    with patch.dict(
+        os.environ,
+        {
+            "USERS_TABLE_NAME": "test-users",
+            "CONTENT_BUCKET_NAME": "test-bucket",
+            "CBTC_APP_URL": "https://test-app.com",
+        },
+    ):
         yield
 
 
