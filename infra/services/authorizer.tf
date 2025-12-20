@@ -15,9 +15,8 @@ resource "aws_lambda_function" "authorizer" {
 
   environment {
     variables = {
-      ENVIRONMENT         = var.environment
-      USERS_TABLE_NAME    = aws_dynamodb_table.users.name
-      CONTENT_BUCKET_NAME = "${var.project_name}-${var.environment}-content"
+      ENVIRONMENT      = var.environment
+      USERS_TABLE_NAME = aws_dynamodb_table.users.name
     }
   }
 
