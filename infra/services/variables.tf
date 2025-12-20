@@ -25,4 +25,5 @@ variable "lambda_sources_bucket_prefix" {
 variable "app_url" {
   description = "URL of the CBTC app"
   type        = string
+  default     = "https://cbtc.app"
 }
