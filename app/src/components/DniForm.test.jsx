@@ -70,7 +70,7 @@ describe('DniForm', () => {
         // Verify download flow
         await waitFor(() => {
             expect(document.createElement).toHaveBeenCalledWith('a');
-            expect(mockLink.download).toBe('photos.zip');
+            expect(mockLink.download).toBe('cbtc-media-day-2025.zip');
             expect(clickMock).toHaveBeenCalled();
             expect(createObjectURLMock).toHaveBeenCalled();
             expect(revokeObjectURLMock).toHaveBeenCalled();

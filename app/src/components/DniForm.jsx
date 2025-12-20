@@ -36,7 +36,7 @@ export default function DniForm() {
                 const url = window.URL.createObjectURL(blob);
                 const link = document.createElement('a');
                 link.href = url;
-                link.download = 'photos.zip';
+                link.download = 'cbtc-media-day-2025.zip';
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);

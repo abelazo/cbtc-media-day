@@ -83,32 +83,55 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
                 "body": json.dumps({"message": "No photos associated to this player", "success": False}),
             }
 
-        logger.error("Retrieving photos from S3")
+        logger.info("Retrieving photos from S3")
         s3_keys = item["photos"]
-        first_key = s3_keys[0]
 
         bucket_name = _get_env_var("CONTENT_BUCKET_NAME")
         s3_client = boto3.client("s3")
 
-        logger.error("Creating ZIP file")
+        logger.info(f"Creating ZIP file with {len(s3_keys)} photos")
         zip_buffer = io.BytesIO()
+        successful_photos = 0
 
         with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
-            # Get the first photo from S3
-            s3_response = s3_client.get_object(Bucket=bucket_name, Key=first_key)
-            photo_content = s3_response["Body"].read()
+            # Iterate through all photos
+            for s3_key in s3_keys:
+                try:
+                    logger.info(f"Retrieving photo: {s3_key}")
+                    s3_response = s3_client.get_object(Bucket=bucket_name, Key=s3_key)
+                    photo_content = s3_response["Body"].read()
 
-            # Extract filename from S3 key (e.g., "TestUser/photo1.jpg" -> "photo1.jpg")
-            filename = first_key.split("/")[-1]
+                    # Extract filename from S3 key (e.g., "TestUser/photo1.jpg" -> "photo1.jpg")
+                    filename = s3_key.split("/")[-1]
 
-            # Add photo to zip file
-            zip_file.writestr(filename, photo_content)
+                    # Add photo to zip file
+                    zip_file.writestr(filename, photo_content)
+                    successful_photos += 1
+                    logger.info(f"Successfully added photo: {filename}")
+
+                except s3_client.exceptions.NoSuchKey:
+                    logger.warning(f"Photo not found in S3, skipping: {s3_key}")
+                    continue
+                except Exception as e:
+                    logger.error(f"Error retrieving photo {s3_key}: {str(e)}, skipping")
+                    continue
+
+        # Check if any photos were successfully retrieved
+        if successful_photos == 0:
+            logger.warning("No photos were successfully retrieved for user")
+            return {
+                "statusCode": 404,
+                "headers": headers,
+                "body": json.dumps({"message": "No photos associated to this player", "success": False}),
+            }
+
+        logger.info(f"Successfully retrieved {successful_photos} out of {len(s3_keys)} photos")
 
         # Get zip file content
         zip_buffer.seek(0)
         zip_content = zip_buffer.read()
 
-        logger.error("Base64 encoding ZIP content")
+        logger.info("Base64 encoding ZIP content")
         b64_content = base64.b64encode(zip_content).decode("utf-8")
 
         return {
@@ -116,7 +139,7 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
             "headers": {
                 "Access-Control-Allow-Origin": app_url,
                 "Content-Type": "application/zip",
-                "Content-Disposition": "attachment; filename=photos.zip",
+                "Content-Disposition": "attachment; filename=cbtc-media-day-2025.zip",
             },
             "body": b64_content,
             "isBase64Encoded": True,
