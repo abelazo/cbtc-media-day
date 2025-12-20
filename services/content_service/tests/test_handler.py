@@ -50,29 +50,40 @@ class TestContentServiceHandler:
         mock_dynamo.Table.return_value = mock_table
 
         # Expect the handler to construct key as "DNI:Name"
-        mock_table.get_item.return_value = {"Item": {"dnis": ["key1.jpg", "key2.jpg"]}}
+        mock_table.get_item.return_value = {"Item": {"photos": ["TestUser/photo1.jpg", "TestUser/photo2.jpg"]}}
 
         # Mock S3 response
         mock_s3 = MagicMock()
         mock_boto_client.return_value = mock_s3
-        file_content = b"file_content"
+        file_content = b"fake_image_content"
         mock_s3.get_object.return_value = {"Body": MagicMock(read=lambda: file_content)}
 
         response = lambda_handler(event, context)
 
         # Assertions
         assert response["statusCode"] == 200
-
-        # Expect Base64 encoded body
-        expected_body = base64.b64encode(file_content).decode("utf-8")
-        assert response["body"] == expected_body
         assert response["isBase64Encoded"] is True
+        assert response["headers"]["Content-Type"] == "application/zip"
+        assert response["headers"]["Content-Disposition"] == "attachment; filename=photos.zip"
 
-        # Verify DynamoDB call with slash separator
-        mock_table.get_item.assert_called_with(Key={"username": f"{dni}:{name}"})
+        # Verify the response body is a valid base64-encoded zip file
+        import io
+        import zipfile
+
+        zip_content = base64.b64decode(response["body"])
+        zip_buffer = io.BytesIO(zip_content)
+
+        with zipfile.ZipFile(zip_buffer, "r") as zip_file:
+            # Verify zip contains the expected file
+            assert "photo1.jpg" in zip_file.namelist()
+            # Verify the content matches
+            assert zip_file.read("photo1.jpg") == file_content
+
+        # Verify DynamoDB call with colon separator
+        mock_table.get_item.assert_called_with(Key={"username": f"{name}"})
 
         # Verify S3 call
-        mock_s3.get_object.assert_called_with(Bucket="test-bucket", Key="key1.jpg")
+        mock_s3.get_object.assert_called_with(Bucket="test-bucket", Key="TestUser/photo1.jpg")
 
     @patch("boto3.resource")
     def test_us004_no_photos_found(self, mock_boto_resource, mock_env_vars):

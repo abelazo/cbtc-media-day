@@ -1,5 +1,5 @@
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import DniForm from './DniForm';
 import { describe, test, expect, vi } from 'bun:test';
 
@@ -26,10 +26,67 @@ describe('DniForm', () => {
         expect(nombreInput.value).toBe('ValidUser');
     });
 
-    test('calls API on submit', async () => {
+    test('handles successful download', async () => {
+        // Mock base64 content (simplified for testing)
+        const base64Content = btoa('fake zip content');
+
         const fetchMock = vi.fn().mockResolvedValue({
             ok: true,
-            json: async () => ({ message: 'Hello, Test!' })
+            text: async () => base64Content
+        });
+        global.fetch = fetchMock;
+
+        // Mock DOM APIs for download
+        const createObjectURLMock = vi.fn().mockReturnValue('blob:mock-url');
+        const revokeObjectURLMock = vi.fn();
+        const originalCreateObjectURL = global.URL.createObjectURL;
+        const originalRevokeObjectURL = global.URL.revokeObjectURL;
+        global.URL.createObjectURL = createObjectURLMock;
+        global.URL.revokeObjectURL = revokeObjectURLMock;
+
+        const clickMock = vi.fn();
+        const mockLink = document.createElement('a');
+        mockLink.click = clickMock;
+
+        const originalCreateElement = document.createElement.bind(document);
+        document.createElement = vi.fn((tag) => {
+            if (tag === 'a') {
+                return mockLink;
+            }
+            return originalCreateElement(tag);
+        });
+
+        render(<DniForm />);
+
+        fireEvent.change(screen.getByLabelText(/DNI/i), { target: { value: '123' } });
+        fireEvent.change(screen.getByLabelText(/Nombre/i), { target: { value: 'User' } });
+        fireEvent.click(screen.getByRole('button', { name: /Enviar/i }));
+
+        // Wait for async operations and state updates
+        await waitFor(() => {
+            expect(fetchMock).toHaveBeenCalled();
+        });
+
+        // Verify download flow
+        await waitFor(() => {
+            expect(document.createElement).toHaveBeenCalledWith('a');
+            expect(mockLink.download).toBe('photos.zip');
+            expect(clickMock).toHaveBeenCalled();
+            expect(createObjectURLMock).toHaveBeenCalled();
+            expect(revokeObjectURLMock).toHaveBeenCalled();
+        });
+
+        // Cleanup
+        document.createElement = originalCreateElement;
+        global.URL.createObjectURL = originalCreateObjectURL;
+        global.URL.revokeObjectURL = originalRevokeObjectURL;
+    });
+
+    test('handles 404 error', async () => {
+        const fetchMock = vi.fn().mockResolvedValue({
+            ok: false,
+            status: 404,
+            text: async () => 'Not found'
         });
         global.fetch = fetchMock;
 
@@ -39,7 +96,10 @@ describe('DniForm', () => {
         fireEvent.change(screen.getByLabelText(/Nombre/i), { target: { value: 'User' } });
         fireEvent.click(screen.getByRole('button', { name: /Enviar/i }));
 
-        // We expect fetch to be called. We can't easily check args without knowing exact env var
-        expect(fetchMock).toHaveBeenCalled();
+        // Wait for async operations and state updates
+        await waitFor(() => {
+            expect(fetchMock).toHaveBeenCalled();
+            expect(screen.getByText(/No hay fotos asociadas a este jugador/i)).toBeTruthy();
+        });
     });
 });

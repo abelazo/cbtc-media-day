@@ -21,10 +21,9 @@ help:
 
 # Setup development environment
 [group('setup')]
-setup:
-    @echo "Setting up development environment..."
+sync:
+    @echo "Syncing development environment..."
     uv sync --all-extras
-    @echo "✓ Development environment ready"
 
 # Clean build artifacts and caches
 [group('setup')]

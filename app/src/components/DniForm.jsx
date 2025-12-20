@@ -21,8 +21,28 @@ export default function DniForm() {
             });
 
             if (response.ok) {
-                const data = await response.json();
-                setMessage(data.message || 'OK');
+                // Response is a base64-encoded zip file
+                const base64Content = await response.text();
+
+                // Decode base64 to binary
+                const binaryString = atob(base64Content);
+                const bytes = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
+
+                // Create blob and trigger download
+                const blob = new Blob([bytes], { type: 'application/zip' });
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'photos.zip';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+
+                setMessage('¡Descarga completada! Revisa tu carpeta de descargas.');
             } else if (response.status === 404) {
                 setMessage('Error (' + response.status + ') : No hay fotos asociadas a este jugador');
             } else {
