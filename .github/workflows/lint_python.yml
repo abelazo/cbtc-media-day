@@ -1,17 +1,15 @@
 ---
-name: Lint Services
+name: Lint Python
 
 on:
   push:
     paths:
-      - '.github/workflows/lint_services.yml'
+      - '.github/workflows/lint_python.yml'
       - 'services/**'
-
-env:
-  UV_VERSION: 0.5.0
+      - 'pipelines/**'
 
 jobs:
-  lint-services:
+  lint-python:
     runs-on: ubuntu-latest
 
     steps:
@@ -27,10 +25,9 @@ jobs:
         uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
-          version: ${{ env.UV_VERSION }}
 
       - name: Install dependencies
-        run: uv sync --frozen --extra dev
+        run: uv sync --all-packages --extra dev
 
       - name: Check formatting with black
         run: uv run black --check .

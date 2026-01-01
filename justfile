@@ -4,26 +4,37 @@ set dotenv-load
 # Infrastructure
 [group('infra')]
 mod infra
-# Lambda services
-[group('services')]
-mod services
-# Functional tests
-[group('tests')]
-mod tests
 
 # Frontend Application
-[group('app')]
+[group('frontend')]
 mod app
+
+# Lambda services
+[group('backend')]
+mod services
+
+# Data pipelines
+[group('pipelines')]
+mod pipelines
+
+# Functional tests
+[group('tests')]
+mod e2e 'tests'
+
 
 # Default recipe - show available commands
 help:
     @just --list
 
-# Setup development environment
+# Setup development environment for all packages
 [group('setup')]
-sync:
+sync-all:
     @echo "Syncing development environment..."
-    uv sync --all-extras
+    uv sync --all-packages --all-extras
+
+sync package:
+    @echo "Syncing development environment for package..."
+    uv sync --package {{package}} --all-extras
 
 # Clean build artifacts and caches
 [group('setup')]

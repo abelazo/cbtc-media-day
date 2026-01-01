@@ -1,0 +1,28 @@
+# Pipelines management recipes
+
+# Import data processing module
+mod players_tutors 'players_tutors'
+
+# Default recipe - show available commands
+help:
+    @just --list
+
+# Run all pipeline tests
+test-all:
+    @echo "Running all pipeline tests..."
+    uv run pytest ./
+    @echo "All pipeline tests passed"
+
+# Lint all pipelines
+lint-all:
+    @echo "Linting all pipelines..."
+    uv run ruff check .
+    uv run black --check .
+    @echo "All pipelines linted"
+
+# Format all pipelines
+format-all:
+    @echo "Formatting all pipelines..."
+    uv run black .
+    uv run ruff check --fix .
+    @echo "All pipelines formatted"

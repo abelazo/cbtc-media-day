@@ -1,6 +1,9 @@
 # Services management recipes
 
-# Import content service module
+# Authorizer module
+mod authorizer 'authorizer'
+
+# Content service module
 mod content 'content_service'
 
 # Default recipe - show available commands

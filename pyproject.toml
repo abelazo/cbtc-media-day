@@ -4,8 +4,6 @@ version = "0.1.0"
 description = "A serverless AWS application built with Python 3.12 and Terraform"
 requires-python = ">=3.12"
 dependencies = [
-    "boto3>=1.42.5",
-    "botocore>=1.42.5",
     "python-dotenv>=1.2.1",
 ]
 
@@ -100,3 +98,7 @@ dev = [
     "playwright>=1.57.0",
     "pytest-playwright>=0.7.2",
 ]
+
+[tool.uv.workspace]
+members = ["pipelines/*", "services/*"]
+exclude = ["**/__pycache__"]
