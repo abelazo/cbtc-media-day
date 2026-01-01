@@ -1,10 +1,10 @@
 # CBTC Media Day
 
-| Pipeline | Status |
-| --- | --- |
-| Deploy | [![Deploy](https://github.com/abelazo/cbtc-media-day/actions/workflows/deploy.yml/badge.svg)](https://github.com/abelazo/cbtc-media-day/actions/workflows/deploy.yml) |
-| Infrastructure lint | [![Infrastructure](https://github.com/abelazo/cbtc-media-day/actions/workflows/lint_infra.yml/badge.svg)](https://github.com/abelazo/cbtc-media-day/actions/workflows/lint_infra.yml) |
-| Services lint | [![Services](https://github.com/abelazo/cbtc-media-day/actions/workflows/lint_services.yml/badge.svg)](https://github.com/abelazo/cbtc-media-day/actions/workflows/lint_services.yml) |
+| Pipeline                | Status                                                                                                                                                                                          |
+|-------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Deploy                  | [![Deploy](https://github.com/abelazo/cbtc-media-day/actions/workflows/deploy.yml/badge.svg)](https://github.com/abelazo/cbtc-media-day/actions/workflows/deploy.yml)                           |
+| Infrastructure lint     | [![Infrastructure](https://github.com/abelazo/cbtc-media-day/actions/workflows/lint_infra.yml/badge.svg)](https://github.com/abelazo/cbtc-media-day/actions/workflows/lint_infra.yml)           |
+| Services/Pipelines lint | [![Services](https://github.com/abelazo/cbtc-media-day/actions/workflows/lint_services-pipelines.yml/badge.svg)](https://github.com/abelazo/cbtc-media-day/actions/workflows/lint_services-pipelines.yml) |
 
 A serverless AWS application built with Python 3.12 and Terraform, following Test-Driven Development (TDD) principles.
 
@@ -15,24 +15,30 @@ This is a **monorepo** containing all services, infrastructure, shared libraries
 ### Directory Structure
 
 ```
+/.github/workflows/   # CI/CD pipelines
+/app/                  # Frontend application (React + Vite)
+    src/               # Frontend source code
+    public/            # Public assets
+    bun.lockb         # Bun lockfile
+/docs/                 # Documentation
+    user_stories/      # User Story definitions
+    architecture/      # Architecture documentation
+    adr/              # Architectural Decision Records
+/infra/                # Terraform infrastructure as code
+    global/            # Global resources (S3, DynamoDB, IAM)
+    services/          # Service-specific infrastructure
+/pipelines/            # Data pipelines
+    <pipeline_name>/
+        src/           # Pipeline source code
+        tests/         # Unit tests for this pipeline
+        requirements.txt
 /services/              # AWS Lambda services
     <service_name>/
         src/           # Service source code
         tests/         # Unit tests for this service
         requirements.txt
-/infra/                # Terraform infrastructure as code
-    global/            # Global resources (S3, DynamoDB, IAM)
-    services/          # Service-specific infrastructure
-/libs/                 # Shared code across services
-    shared_code/
-/docs/                 # Documentation
-    user_stories/      # User Story definitions
-    architecture/      # Architecture documentation
-    adr/              # Architectural Decision Records
 /tests/
     functional/        # End-to-end functional tests per User Story
-/scripts/             # Utility scripts
-/.github/workflows/   # CI/CD pipelines
 ```
 
 ## Development Methodology

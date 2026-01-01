@@ -1,10 +1,10 @@
 ---
-name: Lint Python
+name: Lint Services and Pipelines
 
 on:
   push:
     paths:
-      - '.github/workflows/lint_python.yml'
+      - 'lint_services-pipelines.yml'
       - 'services/**'
       - 'pipelines/**'
 

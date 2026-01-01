@@ -8,7 +8,7 @@ on:
       - '.github/workflows/deploy.yml'
       - '.github/workflows/tests-ut.yml'
       - '.github/workflows/tests-e2e.yml'
-      - '.github/workflows/lint_python.yml'
+      - 'lint-services_pipelines.yml'
       - 'infra/**'
       - 'services/**'
       - 'pipelines/**'
