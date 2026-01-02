@@ -3,15 +3,13 @@ name: Deploy
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
     paths:
       - '.github/workflows/deploy.yml'
-      - '.github/workflows/tests-ut.yml'
-      - '.github/workflows/tests-e2e.yml'
-      - 'lint-services_pipelines.yml'
+      - '.github/workflows/tests-*.yml'
       - 'infra/**'
       - 'services/**'
-      - 'pipelines/**'
       - 'tests/**'
   workflow_dispatch:
     inputs:

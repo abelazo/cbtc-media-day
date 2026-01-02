@@ -1,4 +1,4 @@
-# Services management recipes
+# Backend services recipes
 
 # Authorizer module
 mod authorizer 'authorizer'
@@ -14,21 +14,18 @@ help:
 test-all:
     @echo "Running all service tests..."
     uv run pytest ./
-    @echo "✓ All service tests passed"
 
 # Lint all services
 lint-all:
     @echo "Linting all services..."
     uv run ruff check .
     uv run black --check .
-    @echo "✓ All services linted"
 
 # Format all services
 format-all:
     @echo "Formatting all services..."
     uv run black .
     uv run ruff check --fix .
-    @echo "✓ All services formatted"
 
 # Build all services
 build-all:
@@ -39,4 +36,3 @@ build-all:
             (cd "$dir" && bash build.sh); \
         fi \
     done
-    @echo "✓ All services built"

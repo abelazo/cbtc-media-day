@@ -4,7 +4,6 @@ name: "[template] End-to-End Tests"
 on:
   workflow_call:
   pull_request:
-    branches: [main]
 
 jobs:
   e2e-tests:
@@ -163,11 +162,12 @@ jobs:
 
                   with open('test_output.txt', 'r') as f:
                       for line in f:
-                          m = re.search(r'(us_\d+)_test\.py::(\w+)::([\w\[\]]+)\s+(PASSED|FAILED|SKIPPED|XFAIL|XPASS)', line)
+                          pattern = r'(us_\d+)_test\.py::(\w+)::([\w\[\]]+)\s+(PASSED|FAILED|SKIPPED|XFAIL|XPASS)'
+                          m = re.search(pattern, line)
                           if m:
                               us, cls, test, status = m.groups()
                               us_fmt = us.upper().replace('_', '-')
-                              icon = '✅' if status == 'PASSED' or status == 'XPASS' else '❌' if status == 'FAILED' else '⚠️'
+                              icon = '✅' if status in ('PASSED', 'XPASS') else '❌' if status == 'FAILED' else '⚠️'
                               report.write(f'| {us_fmt} | {test} | {icon} {status} |\n')
           "
 

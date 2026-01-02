@@ -4,7 +4,7 @@ name: Lint Services and Pipelines
 on:
   push:
     paths:
-      - 'lint_services-pipelines.yml'
+      - '.github/workflows/lint_services-pipelines.yml'
       - 'services/**'
       - 'pipelines/**'
 
