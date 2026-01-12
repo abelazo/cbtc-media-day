@@ -44,7 +44,10 @@ def add_canonical_name_column(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def add_tutor_columns(df: pd.DataFrame) -> pd.DataFrame:
-    """Parse Tutores column into Tutor1 and Tutor2 columns in canonical format, handling both / and // separators."""
+    """Parse Tutores column into Tutor1 and Tutor2 columns in canonical format, handling both / and // separators.
+
+    Deduplicates tutors so that if Tutor1 and Tutor2 are the same, only Tutor1 is kept.
+    """
 
     # Split by '/' and filter out empty parts (handles both / and //)
     def parse_tutores(tutores_value):
@@ -65,6 +68,10 @@ def add_tutor_columns(df: pd.DataFrame) -> pd.DataFrame:
     # Convert to canonical format
     df["Tutor1"] = df["Tutor1"].apply(to_canonical)
     df["Tutor2"] = df["Tutor2"].apply(to_canonical)
+
+    # Deduplicate: if Tutor1 and Tutor2 are the same, clear Tutor2
+    mask = (df["Tutor1"] != "") & (df["Tutor1"] == df["Tutor2"])
+    df.loc[mask, "Tutor2"] = ""
 
     return df
 
