@@ -151,6 +151,7 @@ def print_statistics(
     players_without_tutors: pd.DataFrame,
     tutor1_not_found: pd.DataFrame,
     tutor2_not_found: pd.DataFrame,
+    players_without_any_id: pd.DataFrame,
 ):
     # Calculate statistics
     total_players = len(players_df)
@@ -219,6 +220,19 @@ def print_statistics(
 
     print("=" * 60)
 
+    # Statistics for players without any ID (player and tutors)
+    count_without_any_id = len(players_without_any_id)
+    print("\n" + "=" * 60)
+    print("PLAYERS WITHOUT ANY ID (PLAYER AND TUTORS)")
+    print("=" * 60)
+    print(f"Players without DNI/NIE/Passport where tutors also lack IDs: {count_without_any_id}")
+
+    if count_without_any_id > 0:
+        players_without_any_id_sorted = players_without_any_id.sort_values(by="BirthDate")
+        print(players_without_any_id_sorted[["CanonicalName", "BirthDate", "Tutor1", "Tutor2"]].to_string(index=False))
+
+    print("=" * 60)
+
 
 def main():
     # Example: Load the cbtc_all.xlsx file
@@ -239,6 +253,39 @@ def main():
     tutor1_not_found = players_df[players_df["Tutor1"] == "not_found"]
     tutor2_not_found = players_df[players_df["Tutor2"] == "not_found"]
 
+    # Players without any ID: player has no DNI/NIE/Passport AND tutors also lack IDs
+    def has_no_id(row):
+        # Check player has no ID
+        player_no_id = pd.isna(row["DNI"]) and pd.isna(row["NIE"]) and pd.isna(row["Pasaporte"])
+        if not player_no_id:
+            return False
+
+        # Check Tutor1 has no ID (empty tutor or tutor without IDs)
+        tutor1_no_id = (
+            row["Tutor1"] == ""
+            or row["Tutor1"] == "not_found"
+            or (
+                (pd.isna(row["Tutor1DNI"]) or row["Tutor1DNI"] == "")
+                and (pd.isna(row["Tutor1NIE"]) or row["Tutor1NIE"] == "")
+                and (pd.isna(row["Tutor1Passport"]) or row["Tutor1Passport"] == "")
+            )
+        )
+
+        # Check Tutor2 has no ID (empty tutor or tutor without IDs)
+        tutor2_no_id = (
+            row["Tutor2"] == ""
+            or row["Tutor2"] == "not_found"
+            or (
+                (pd.isna(row["Tutor2DNI"]) or row["Tutor2DNI"] == "")
+                and (pd.isna(row["Tutor2NIE"]) or row["Tutor2NIE"] == "")
+                and (pd.isna(row["Tutor2Passport"]) or row["Tutor2Passport"] == "")
+            )
+        )
+
+        return tutor1_no_id and tutor2_no_id
+
+    players_without_any_id = players_df[players_df.apply(has_no_id, axis=1)]
+
     print_statistics(
         players_df,
         tutors_df,
@@ -248,6 +295,7 @@ def main():
         players_without_tutors,
         tutor1_not_found,
         tutor2_not_found,
+        players_without_any_id,
     )
 
 
