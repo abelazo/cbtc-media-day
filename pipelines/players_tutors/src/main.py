@@ -174,64 +174,54 @@ def print_statistics(
     pct_without = (count_without / total_players * 100) if total_players > 0 else 0
 
     # Print statistics
-    print("\n" + "=" * 60)
+    print("=" * 60)
     print("STATISTICS")
     print("=" * 60)
-    print(f"\nTotal Players: {total_players}")
+    print(f"Total Players: {total_players}")
     print(f"Total Tutors: {total_tutors}")
-    print("-" * 60)
-    print(f"\nPlayers with two tutors: {count_both} ({pct_both:.2f}%)")
-    print(players_with_both.head().to_string(index=False))
-    print("-" * 60)
-    print(players_with_tutor1_only.head().to_string(index=False))
-    print("-" * 60)
+    print(f"Players with two tutors: {count_both} ({pct_both:.2f}%)")
+    # print(players_with_both.head().to_string(index=False))
     print(f"Players with Tutor1 only: {count_tutor1_only} ({pct_tutor1_only:.2f}%)")
-    print(players_with_tutor1_only.head().to_string(index=False))
-    print("-" * 60)
+    # print(players_with_tutor1_only.head().to_string(index=False))
     print(f"Players with Tutor2 only: {count_tutor2_only} ({pct_tutor2_only:.2f}%)")
-    print(players_with_tutor2_only[["CanonicalName", "Tutor1", "Tutor2"]].head().to_string(index=False))
-    print("-" * 60)
+    # print(players_with_tutor2_only[["CanonicalName", "Tutor1", "Tutor2"]].head().to_string(index=False))
     print(f"Players without tutors: {count_without} ({pct_without:.2f}%)")
-    if count_without > 0:
-        pd.set_option("display.max_columns", None)
-        pd.set_option("display.width", None)
-        pd.set_option("display.max_colwidth", 30)
-        players_without_tutors = players_without_tutors.sort_values(by="BirthDate")
-        print(players_without_tutors[["CanonicalName", "DNI", "NIE", "Pasaporte", "BirthDate"]].to_string(index=False))
+    # if count_without > 0:
+    #     pd.set_option("display.max_columns", None)
+    #     pd.set_option("display.width", None)
+    #     pd.set_option("display.max_colwidth", 30)
+    #     players_without_tutors = players_without_tutors.sort_values(by="BirthDate")
+    #     print(players_without_tutors[["CanonicalName", "DNI", "NIE", "Pasaporte", "BirthDate"]]
+    #           .to_string(index=False))
+    # print("-" * 60)
 
-    print("-" * 60)
     # Statistics for not_found tutors
     count_tutor1_not_found = len(tutor1_not_found)
     count_tutor2_not_found = len(tutor2_not_found)
-
-    print("\n" + "=" * 60)
+    print("=" * 60)
     print("NOT FOUND TUTORS STATISTICS")
     print("=" * 60)
     print(f"Players with Tutor1 not found: {count_tutor1_not_found}")
     print(f"Players with Tutor2 not found: {count_tutor2_not_found}")
-
-    if count_tutor1_not_found > 0:
-        print(f"\nPlayers with Tutor1 not found ({count_tutor1_not_found}):")
-        print(tutor1_not_found[["CanonicalName", "Tutor1"]].to_string(index=False))
-
-    if count_tutor2_not_found > 0:
-        print(f"\nPlayers with Tutor2 not found ({count_tutor2_not_found}):")
-        print(tutor2_not_found[["CanonicalName", "Tutor2"]].to_string(index=False))
-
-    print("=" * 60)
+    # if count_tutor1_not_found > 0:
+    #     print(f"\nPlayers with Tutor1 not found ({count_tutor1_not_found}):")
+    #     print(tutor1_not_found[["CanonicalName", "Tutor1"]].to_string(index=False))
+    # if count_tutor2_not_found > 0:
+    #     print(f"\nPlayers with Tutor2 not found ({count_tutor2_not_found}):")
+    #     print(tutor2_not_found[["CanonicalName", "Tutor2"]].to_string(index=False))
+    print("-" * 60)
 
     # Statistics for players without any ID (player and tutors)
     count_without_any_id = len(players_without_any_id)
-    print("\n" + "=" * 60)
+    print("=" * 60)
     print("PLAYERS WITHOUT ANY ID (PLAYER AND TUTORS)")
     print("=" * 60)
     print(f"Players without DNI/NIE/Passport where tutors also lack IDs: {count_without_any_id}")
-
-    if count_without_any_id > 0:
-        players_without_any_id_sorted = players_without_any_id.sort_values(by="BirthDate")
-        print(players_without_any_id_sorted[["CanonicalName", "BirthDate", "Tutor1", "Tutor2"]].to_string(index=False))
-
-    print("=" * 60)
+    # if count_without_any_id > 0:
+    #     players_without_any_id_sorted = players_without_any_id.sort_values(by="BirthDate")
+    #     print(players_without_any_id_sorted[["CanonicalName", "BirthDate", "Tutor1", "Tutor2"]]
+    #           .to_string(index=False))
+    print("-" * 60)
 
 
 def main():
