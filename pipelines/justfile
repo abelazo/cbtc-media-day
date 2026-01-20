@@ -1,7 +1,11 @@
 # Pipelines management recipes
 
-# Import data processing module
-mod players_tutors 'players_tutors'
+# CBTC players and tutors pipelines
+mod players-tutors 'players_tutors'
+
+# CBTC media day pipeline
+mod media-day 'media_day'
+
 
 # Default recipe - show available commands
 help:
