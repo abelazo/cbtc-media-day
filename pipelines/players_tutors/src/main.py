@@ -225,10 +225,16 @@ def print_statistics(
 
 
 def main():
-    # Example: Load the cbtc_all.xlsx file
-    file_path = os.environ.get("CBTC_ALL_PLAYERS_PATH", "data/cbtc_all.xlsx")
+    media_day_path = os.environ.get("CBTC_MEDIA_DAY_PATH", "data/cbtc_media_day.csv")
 
-    all_df = load_excel(file_path)
+    media_day_all_df = pd.read_csv(media_day_path, encoding="utf-8")
+    media_day_all_df = add_canonical_name_column(media_day_all_df)
+    print(f"Loaded {len(media_day_all_df)} rows")
+    # print(media_day_all_df.to_string())
+
+    players_tutors_path = os.environ.get("CBTC_ALL_PLAYERS_PATH", "data/cbtc_all.xlsx")
+
+    all_df = load_excel(players_tutors_path)
     print(f"Loaded {len(all_df)} rows")
     all_df["BirthDate"] = pd.to_datetime(all_df["Fecha nac."], errors="coerce", dayfirst=True)
 
