@@ -1,5 +1,5 @@
 import pandas as pd
-from main import add_canonical_name_column, to_ascii, to_canonical
+from main import add_canonical_name_column, find_media_day_players_in_players_df, to_ascii, to_canonical
 
 
 class TestToAscii:
@@ -83,3 +83,59 @@ class TestAddCanonicalNameColumn:
         df = pd.DataFrame({"Nombre": ["  Juan  "], "Apellidos": ["  Garcia   Lopez  "]})
         result = add_canonical_name_column(df)
         assert result["CanonicalName"].iloc[0] == "juan_garcia_lopez"
+
+
+class TestFindMediaDayPlayersInPlayersDF:
+    def test_finds_exact_match(self):
+        media_day_df = pd.DataFrame({"Role": ["1", "2"], "CanonicalName": ["juan_garcia", "maria_lopez"]})
+        players_df = pd.DataFrame({"CanonicalName": ["juan_garcia", "pedro_sanchez"]})
+
+        found, not_found = find_media_day_players_in_players_df(media_day_df, players_df)
+
+        assert len(found) == 1
+        assert len(not_found) == 1
+        assert found["CanonicalName"].iloc[0] == "juan_garcia"
+        assert not_found["CanonicalName"].iloc[0] == "maria_lopez"
+
+    def test_finds_prefix_match(self):
+        media_day_df = pd.DataFrame({"Role": ["1"], "CanonicalName": ["juan_garcia"]})
+        players_df = pd.DataFrame({"CanonicalName": ["juan_garcia_lopez"]})
+
+        found, not_found = find_media_day_players_in_players_df(media_day_df, players_df)
+
+        assert len(found) == 1
+        assert len(not_found) == 0
+        assert found["CanonicalName"].iloc[0] == "juan_garcia"
+
+    def test_filters_only_numeric_roles(self):
+        media_day_df = pd.DataFrame(
+            {
+                "Role": ["1", "Tutor", "2", None, ""],
+                "CanonicalName": ["player1", "tutor1", "player2", "unknown", "empty"],
+            }
+        )
+        players_df = pd.DataFrame({"CanonicalName": ["player1", "player2", "tutor1"]})
+
+        found, not_found = find_media_day_players_in_players_df(media_day_df, players_df)
+
+        # Only 2 rows with numeric roles should be processed
+        assert len(found) + len(not_found) == 2
+        assert len(found) == 2
+
+    def test_empty_media_day_players(self):
+        media_day_df = pd.DataFrame({"Role": ["Tutor"], "CanonicalName": ["tutor1"]})
+        players_df = pd.DataFrame({"CanonicalName": ["player1"]})
+
+        found, not_found = find_media_day_players_in_players_df(media_day_df, players_df)
+
+        assert len(found) == 0
+        assert len(not_found) == 0
+
+    def test_empty_canonical_name(self):
+        media_day_df = pd.DataFrame({"Role": ["1", "2"], "CanonicalName": ["", "juan_garcia"]})
+        players_df = pd.DataFrame({"CanonicalName": ["juan_garcia"]})
+
+        found, not_found = find_media_day_players_in_players_df(media_day_df, players_df)
+
+        assert len(found) == 1
+        assert len(not_found) == 1  # Empty canonical name is not found

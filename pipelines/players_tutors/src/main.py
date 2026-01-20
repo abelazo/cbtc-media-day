@@ -81,8 +81,10 @@ def add_tutor_columns(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def generate_players_df(all_df: pd.DataFrame) -> pd.DataFrame:
-    # Filter for players only
-    players_df = all_df[all_df["Roles"].str.contains("Deportista", na=False)].copy()
+    # Filter for players (Deportista) or Fans
+    is_player = all_df["Roles"].str.contains("Deportista", na=False)
+    is_strict_fan = all_df["Roles"].fillna("").str.strip() == "Fan"
+    players_df = all_df[is_player | is_strict_fan].copy()
     players_df = add_canonical_name_column(players_df)
     players_df = add_tutor_columns(players_df)
     return players_df
@@ -140,6 +142,67 @@ def merge_tutor_info(players_df: pd.DataFrame, tutors_df: pd.DataFrame) -> pd.Da
                 players_df.at[idx, "Tutor2"] = "not_found"
 
     return players_df
+
+
+def find_media_day_players_in_players_df(
+    media_day_all_df: pd.DataFrame, players_df: pd.DataFrame
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Find media day players that are present or not present in players_df.
+
+    A media day player is considered present if any players_df CanonicalName
+    starts with the media day player's CanonicalName.
+
+    Args:
+        media_day_all_df: DataFrame with media day data, filtered for players (Role is numeric)
+        players_df: DataFrame with all players from the main system
+
+    Returns:
+        Tuple of (found_df, not_found_df) - media day players found/not found in players_df
+    """
+    # Filter media_day_all_df for players only (Role column contains a number)
+    media_day_players = media_day_all_df[
+        media_day_all_df["Role"].apply(lambda x: str(x).strip().isdigit() if pd.notna(x) else False)
+    ].copy()
+
+    # Get list of canonical names from players_df
+    players_canonical_names = players_df["CanonicalName"].tolist()
+
+    def is_found_in_players(media_day_canonical_name: str) -> bool:
+        """Check if any players_df CanonicalName starts with the media day CanonicalName."""
+        if not media_day_canonical_name:
+            return False
+        return any(player_name.startswith(media_day_canonical_name) for player_name in players_canonical_names)
+
+    # Determine which media day players are found
+    media_day_players["FoundInPlayersDF"] = media_day_players["CanonicalName"].apply(is_found_in_players)
+
+    found_df = media_day_players[media_day_players["FoundInPlayersDF"]].copy()
+    not_found_df = media_day_players[~media_day_players["FoundInPlayersDF"]].copy()
+
+    return found_df, not_found_df
+
+
+def print_media_day_statistics(found_df: pd.DataFrame, not_found_df: pd.DataFrame):
+    """Print statistics about media day players found/not found in players_df."""
+    total = len(found_df) + len(not_found_df)
+    found_count = len(found_df)
+    not_found_count = len(not_found_df)
+
+    found_pct = (found_count / total * 100) if total > 0 else 0
+    not_found_pct = (not_found_count / total * 100) if total > 0 else 0
+
+    print("=" * 60)
+    print("MEDIA DAY PLAYERS STATISTICS")
+    print("=" * 60)
+    print(f"Total Media Day Players: {total}")
+    print(f"Found in players_df: {found_count} ({found_pct:.2f}%)")
+    print(f"NOT found in players_df: {not_found_count} ({not_found_pct:.2f}%)")
+    # if not_found_count > 0:
+    #     pd.set_option("display.max_columns", None)
+    #     pd.set_option("display.width", None)
+    #     pd.set_option("display.max_colwidth", 30)
+    #     print(not_found_df[["CanonicalName"]].to_string(index=False))
+    print("-" * 60)
 
 
 def print_statistics(
@@ -241,6 +304,10 @@ def main():
     players_df = generate_players_df(all_df)
     tutors_df = generate_tutors_df(all_df)
     players_df = merge_tutor_info(players_df, tutors_df)
+
+    # Find media day players in players_df and print statistics
+    media_day_found, media_day_not_found = find_media_day_players_in_players_df(media_day_all_df, players_df)
+    print_media_day_statistics(media_day_found, media_day_not_found)
 
     players_with_both = players_df[(players_df["Tutor1"] != "") & (players_df["Tutor2"] != "")]
     players_with_tutor1_only = players_df[(players_df["Tutor1"] != "") & (players_df["Tutor2"] == "")]
