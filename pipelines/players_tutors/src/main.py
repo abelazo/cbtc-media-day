@@ -7,7 +7,15 @@ import pandas as pd
 
 from .logger import get_logger
 
-logger = get_logger(__name__, level=logging.DEBUG)
+logLevels = {
+    "FATAL": logging.FATAL,
+    "ERROR": logging.ERROR,
+    "WARNING": logging.WARNING,
+    "INFO": logging.INFO,
+    "DEBUG": logging.DEBUG,
+}
+
+logger = get_logger(__name__, level=logLevels[os.environ.get("PLAYERS_TUTORS_LOG_LEVEL", "INFO").upper()])
 
 
 def load_excel(file_path: str, sheet_name: str | int = 0) -> pd.DataFrame:
@@ -149,29 +157,73 @@ def merge_tutor_info(players_df: pd.DataFrame, tutors_df: pd.DataFrame) -> pd.Da
     return players_df
 
 
+# Players without any ID: player has no DNI/NIE/Passport AND tutors also lack IDs
+def has_no_id(row):
+    # Check player has no ID
+    player_no_id = pd.isna(row["Player_DNI"]) and pd.isna(row["Player_NIE"]) and pd.isna(row["Player_Pasaporte"])
+    if not player_no_id:
+        return False
+    # Check Tutor1 has no ID (empty tutor or tutor without IDs)
+    tutor1_no_id = (
+        row["Player_Tutor1"] == ""
+        or row["Player_Tutor1"] == "not_found"
+        or (
+            (pd.isna(row["Player_Tutor1DNI"]) or row["Player_Tutor1DNI"] == "")
+            and (pd.isna(row["Player_Tutor1NIE"]) or row["Player_Tutor1NIE"] == "")
+            and (pd.isna(row["Player_Tutor1Passport"]) or row["Player_Tutor1Passport"] == "")
+        )
+    )
+    # Check Tutor2 has no ID (empty tutor or tutor without IDs)
+    tutor2_no_id = (
+        row["Player_Tutor2"] == ""
+        or row["Player_Tutor2"] == "not_found"
+        or (
+            (pd.isna(row["Player_Tutor2DNI"]) or row["Player_Tutor2DNI"] == "")
+            and (pd.isna(row["Player_Tutor2NIE"]) or row["Player_Tutor2NIE"] == "")
+            and (pd.isna(row["Player_Tutor2Passport"]) or row["Player_Tutor2Passport"] == "")
+        )
+    )
+    return tutor1_no_id and tutor2_no_id
+
+
 def find_media_day_players_in_players_df(
-    media_day_all_df: pd.DataFrame, players_df: pd.DataFrame
+    media_day_players: pd.DataFrame, players_df: pd.DataFrame
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
 
-    # Filter media_day_all_df for players only (Role column contains a number)
-    media_day_players = media_day_all_df[
-        media_day_all_df["Role"].apply(lambda x: str(x).strip().isdigit() if pd.notna(x) else False)
-    ].copy()
-
-    # Get list of canonical names from players_df
     players_canonical_names = players_df["CanonicalName"].tolist()
 
-    def is_found_in_players(media_day_canonical_name: str) -> bool:
-        """Check if any players_df CanonicalName starts with the media day CanonicalName."""
+    def find_matching_player(media_day_canonical_name: str) -> str | None:
+        """Find the first players_df CanonicalName that starts with the media day CanonicalName."""
         if not media_day_canonical_name:
-            return False
-        return any(player_name.startswith(media_day_canonical_name) for player_name in players_canonical_names)
+            return None
+        for player_name in players_canonical_names:
+            if player_name.startswith(media_day_canonical_name):
+                return player_name
+        return None
 
-    # Determine which media day players are found
-    media_day_players["FoundInPlayersDF"] = media_day_players["CanonicalName"].apply(is_found_in_players)
+    # Find matching player canonical name for each media day player
+    media_day_players["MatchedPlayerCanonicalName"] = media_day_players["CanonicalName"].apply(find_matching_player)
 
-    found_df = media_day_players[media_day_players["FoundInPlayersDF"]].copy()
-    not_found_df = media_day_players[~media_day_players["FoundInPlayersDF"]].copy()
+    # Split into found and not found
+    found_mask = media_day_players["MatchedPlayerCanonicalName"].notna()
+    found_df = media_day_players[found_mask].copy()
+    not_found_df = media_day_players[~found_mask].copy()
+
+    # Merge players_df columns into found_df using the matched canonical name
+    # Rename players_df columns with "Player_" prefix (except CanonicalName used for join)
+    players_renamed = players_df.rename(
+        columns={col: f"Player_{col}" for col in players_df.columns if col != "CanonicalName"}
+    )
+    found_df = found_df.merge(
+        players_renamed,
+        left_on="MatchedPlayerCanonicalName",
+        right_on="CanonicalName",
+        how="left",
+        suffixes=("", "_player"),
+    )
+    # Drop the duplicate CanonicalName column from players_df
+    if "CanonicalName_player" in found_df.columns:
+        found_df = found_df.drop(columns=["CanonicalName_player"])
 
     return found_df, not_found_df
 
@@ -282,19 +334,24 @@ def print_statistics(
 
 
 def main():
-    logger.info("Loading Media Day players...")
+
+    logger.info("Extracting players and members from CBTC data")
+
     media_day_path = os.environ.get("CBTC_MEDIA_DAY_PATH", "data/cbtc_media_day.csv")
     media_day_all_df = pd.read_csv(media_day_path, encoding="utf-8")
     media_day_all_df = add_canonical_name_column(media_day_all_df)
-    logger.info(f"Loaded {len(media_day_all_df)} rows")
+    logger.info(f"Loaded {len(media_day_all_df)} Media Day players & trainers")
 
-    logger.info("Loading CBTC members...")
     players_tutors_path = os.environ.get("CBTC_ALL_PLAYERS_PATH", "data/cbtc_all.xlsx")
     all_df = load_excel(players_tutors_path)
-    logger.info(f"Loaded {len(all_df)} rows")
+    logger.info(f"Loaded {len(all_df)} CBTC members")
 
-    logger.info("Processing CBTC members")
-    logger.info("Starting transformations")
+    logger.info("Transforming CBTC data")
+    media_day_players = media_day_all_df[
+        media_day_all_df["Role"].apply(lambda x: str(x).strip().isdigit() if pd.notna(x) else False)
+    ].copy()
+    logger.info(f"Extracted {len(media_day_players)} from all Media Day presented people")
+
     all_df["BirthDate"] = pd.to_datetime(all_df["Fecha nac."], errors="coerce", dayfirst=True)
 
     players_df = generate_players_df(all_df)
@@ -303,20 +360,51 @@ def main():
     tutors_df = generate_tutors_df(all_df)
     logger.info(f"Extracted {len(tutors_df)} members with role Tutor")
 
-    logger.info("Aggregating Tutor information to Player/Fan...")
+    logger.info("Aggregating Tutor information and Player/Fan as membership information")
     players_df = merge_tutor_info(players_df, tutors_df)
 
+    # Filter media_day_all_df for players only (Role column contains a number)
+
     # Find media day players in players_df and print statistics
-    logger.info("Aggregating CBTC membership information to Media Day players...")
-    media_day_found, media_day_not_found = find_media_day_players_in_players_df(media_day_all_df, players_df)
+    logger.info("Aggregating CBTC membership information and Media Day players")
+    media_day_found, media_day_not_found = find_media_day_players_in_players_df(media_day_players, players_df)
+
+    # Just get the columns we are interested in
+    final_media_day_df = media_day_found[
+        [
+            "CanonicalName",
+            "Player_DNI",
+            "Player_NIE",
+            "Player_Pasaporte",
+            "Player_BirthDate",
+            "Player_Tutor1",
+            "Player_Tutor1DNI",
+            "Player_Tutor1NIE",
+            "Player_Tutor1Passport",
+            "Player_Tutor2",
+            "Player_Tutor2DNI",
+            "Player_Tutor2NIE",
+            "Player_Tutor2Passport",
+        ]
+    ].copy()
 
     # Show all media day players found
-    logger.info(f"Media Day players found in CBTC members: {len(media_day_found)}")
-    pd.set_option("display.max_columns", None)
-    pd.set_option("display.width", None)
-    pd.set_option("display.max_colwidth", 30)
-    # Print all columns
-    logger.info(media_day_found.to_string(index=False))
+    found_pct = (len(final_media_day_df) / len(media_day_players) * 100) if len(media_day_players) > 0 else 0
+    logger.info(f"Media Day players found in CBTC members: {len(final_media_day_df)} ({found_pct:.2f}%)")
+    not_found_pct = (len(media_day_not_found) / len(media_day_players) * 100) if len(media_day_players) > 0 else 0
+    logger.info(f"Media Day players NOT found in CBTC members: {len(media_day_not_found)} ({not_found_pct:.2f}%)")
+    logger.debug(media_day_not_found[["CanonicalName"]].to_string(index=False))
+
+    players_without_any_id = final_media_day_df[final_media_day_df.apply(has_no_id, axis=1)]
+    no_id_pct = (len(players_without_any_id) / len(media_day_players) * 100) if len(media_day_players) > 0 else 0
+    logger.info(
+        f"Media Day players without ID (Player, Tutor1 or Tutor2): {len(players_without_any_id)} ({no_id_pct:.2f}%)"
+    )
+
+    # Export final media day dataframe to CSV
+    output_media_day_path = os.environ.get("CBTC_MEDIA_DAY_OUTPUT_PATH", "output/cbtc_media_day_players.csv")
+    final_media_day_df.to_csv(output_media_day_path, index=False, encoding="utf-8")
+    logger.info(f"Exported Media Day players with CBTC membership info to {output_media_day_path}")
 
     # Statistics
     print_media_day_statistics(media_day_found, media_day_not_found)
@@ -326,39 +414,6 @@ def main():
     players_without_tutors = players_df[(players_df["Tutor1"] == "") & (players_df["Tutor2"] == "")]
     tutor1_not_found = players_df[players_df["Tutor1"] == "not_found"]
     tutor2_not_found = players_df[players_df["Tutor2"] == "not_found"]
-
-    # Players without any ID: player has no DNI/NIE/Passport AND tutors also lack IDs
-    def has_no_id(row):
-        # Check player has no ID
-        player_no_id = pd.isna(row["DNI"]) and pd.isna(row["NIE"]) and pd.isna(row["Pasaporte"])
-        if not player_no_id:
-            return False
-
-        # Check Tutor1 has no ID (empty tutor or tutor without IDs)
-        tutor1_no_id = (
-            row["Tutor1"] == ""
-            or row["Tutor1"] == "not_found"
-            or (
-                (pd.isna(row["Tutor1DNI"]) or row["Tutor1DNI"] == "")
-                and (pd.isna(row["Tutor1NIE"]) or row["Tutor1NIE"] == "")
-                and (pd.isna(row["Tutor1Passport"]) or row["Tutor1Passport"] == "")
-            )
-        )
-
-        # Check Tutor2 has no ID (empty tutor or tutor without IDs)
-        tutor2_no_id = (
-            row["Tutor2"] == ""
-            or row["Tutor2"] == "not_found"
-            or (
-                (pd.isna(row["Tutor2DNI"]) or row["Tutor2DNI"] == "")
-                and (pd.isna(row["Tutor2NIE"]) or row["Tutor2NIE"] == "")
-                and (pd.isna(row["Tutor2Passport"]) or row["Tutor2Passport"] == "")
-            )
-        )
-
-        return tutor1_no_id and tutor2_no_id
-
-    players_without_any_id = players_df[players_df.apply(has_no_id, axis=1)]
 
     print_statistics(
         players_df,
