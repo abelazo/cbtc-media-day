@@ -30,11 +30,17 @@ just services::content::test      # Content service unit tests
 just services::authorizer::test   # Authorizer unit tests
 # Pipeline Unit Tests
 just pipelines::test-all             # All pipeline tests
-just pipelines::players_tutors::test # Players Tutors pipeline tests
+just pipelines::players-tutors::test # Players Tutors pipeline tests
 
 # E2E tests (requires LocalStack running)
 just e2e::run                     # All functional tests
 just e2e::run-story us_004        # Single user story test
+```
+
+### Run
+```bash
+# Backend Unit Tests
+just pipelines::players-tutors::run # Run players_tutors pipeline locally
 ```
 
 ### Code Quality

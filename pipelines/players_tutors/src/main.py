@@ -1,8 +1,13 @@
+import logging
 import os
 import re
 import unicodedata
 
 import pandas as pd
+
+from .logger import get_logger
+
+logger = get_logger(__name__, level=logging.DEBUG)
 
 
 def load_excel(file_path: str, sheet_name: str | int = 0) -> pd.DataFrame:
@@ -127,7 +132,7 @@ def merge_tutor_info(players_df: pd.DataFrame, tutors_df: pd.DataFrame) -> pd.Da
                 players_df.at[idx, "Tutor1NIE"] = tutor_info.get("NIE", "") or ""
                 players_df.at[idx, "Tutor1Passport"] = tutor_info.get("Pasaporte", "") or ""
             else:
-                print(f"Tutor1 '{tutor1_name}' not found for player '{row['CanonicalName']}'")
+                logger.warning(f"Tutor1 '{tutor1_name}' not found for player '{row['CanonicalName']}'")
                 players_df.at[idx, "Tutor1"] = "not_found"
 
         tutor2_name = row["Tutor2"]
@@ -138,7 +143,7 @@ def merge_tutor_info(players_df: pd.DataFrame, tutors_df: pd.DataFrame) -> pd.Da
                 players_df.at[idx, "Tutor2NIE"] = tutor_info.get("NIE", "") or ""
                 players_df.at[idx, "Tutor2Passport"] = tutor_info.get("Pasaporte", "") or ""
             else:
-                print(f"Tutor2 '{tutor2_name}' not found for player '{row['CanonicalName']}'")
+                logger.warning(f"Tutor2 '{tutor2_name}' not found for player '{row['CanonicalName']}'")
                 players_df.at[idx, "Tutor2"] = "not_found"
 
     return players_df
@@ -147,18 +152,7 @@ def merge_tutor_info(players_df: pd.DataFrame, tutors_df: pd.DataFrame) -> pd.Da
 def find_media_day_players_in_players_df(
     media_day_all_df: pd.DataFrame, players_df: pd.DataFrame
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Find media day players that are present or not present in players_df.
 
-    A media day player is considered present if any players_df CanonicalName
-    starts with the media day player's CanonicalName.
-
-    Args:
-        media_day_all_df: DataFrame with media day data, filtered for players (Role is numeric)
-        players_df: DataFrame with all players from the main system
-
-    Returns:
-        Tuple of (found_df, not_found_df) - media day players found/not found in players_df
-    """
     # Filter media_day_all_df for players only (Role column contains a number)
     media_day_players = media_day_all_df[
         media_day_all_df["Role"].apply(lambda x: str(x).strip().isdigit() if pd.notna(x) else False)
@@ -191,18 +185,18 @@ def print_media_day_statistics(found_df: pd.DataFrame, not_found_df: pd.DataFram
     found_pct = (found_count / total * 100) if total > 0 else 0
     not_found_pct = (not_found_count / total * 100) if total > 0 else 0
 
-    print("=" * 60)
-    print("MEDIA DAY PLAYERS STATISTICS")
-    print("=" * 60)
-    print(f"Total Media Day Players: {total}")
-    print(f"Found in players_df: {found_count} ({found_pct:.2f}%)")
-    print(f"NOT found in players_df: {not_found_count} ({not_found_pct:.2f}%)")
+    logger.debug("=" * 60)
+    logger.debug("MEDIA DAY PLAYERS STATISTICS")
+    logger.debug("=" * 60)
+    logger.debug(f"Total Media Day Players: {total}")
+    logger.debug(f"Found in players_df: {found_count} ({found_pct:.2f}%)")
+    logger.debug(f"NOT found in players_df: {not_found_count} ({not_found_pct:.2f}%)")
     # if not_found_count > 0:
     #     pd.set_option("display.max_columns", None)
     #     pd.set_option("display.width", None)
     #     pd.set_option("display.max_colwidth", 30)
-    #     print(not_found_df[["CanonicalName"]].to_string(index=False))
-    print("-" * 60)
+    #     logger.debug(not_found_df[["CanonicalName"]].to_string(index=False))
+    logger.debug("-" * 60)
 
 
 def print_statistics(
@@ -237,78 +231,95 @@ def print_statistics(
     pct_without = (count_without / total_players * 100) if total_players > 0 else 0
 
     # Print statistics
-    print("=" * 60)
-    print("STATISTICS")
-    print("=" * 60)
-    print(f"Total Players: {total_players}")
-    print(f"Total Tutors: {total_tutors}")
-    print(f"Players with two tutors: {count_both} ({pct_both:.2f}%)")
-    # print(players_with_both.head().to_string(index=False))
-    print(f"Players with Tutor1 only: {count_tutor1_only} ({pct_tutor1_only:.2f}%)")
-    # print(players_with_tutor1_only.head().to_string(index=False))
-    print(f"Players with Tutor2 only: {count_tutor2_only} ({pct_tutor2_only:.2f}%)")
-    # print(players_with_tutor2_only[["CanonicalName", "Tutor1", "Tutor2"]].head().to_string(index=False))
-    print(f"Players without tutors: {count_without} ({pct_without:.2f}%)")
+    logger.debug("=" * 60)
+    logger.debug("STATISTICS")
+    logger.debug("=" * 60)
+    logger.debug(f"Total Players: {total_players}")
+    logger.debug(f"Total Tutors: {total_tutors}")
+    logger.debug(f"Players with two tutors: {count_both} ({pct_both:.2f}%)")
+    # logger.info(players_with_both.head().to_string(index=False))
+    logger.debug(f"Players with Tutor1 only: {count_tutor1_only} ({pct_tutor1_only:.2f}%)")
+    # logger.info(players_with_tutor1_only.head().to_string(index=False))
+    logger.debug(f"Players with Tutor2 only: {count_tutor2_only} ({pct_tutor2_only:.2f}%)")
+    # logger.info(players_with_tutor2_only[["CanonicalName", "Tutor1", "Tutor2"]].head().to_string(index=False))
+    logger.debug(f"Players without tutors: {count_without} ({pct_without:.2f}%)")
     # if count_without > 0:
     #     pd.set_option("display.max_columns", None)
     #     pd.set_option("display.width", None)
     #     pd.set_option("display.max_colwidth", 30)
     #     players_without_tutors = players_without_tutors.sort_values(by="BirthDate")
-    #     print(players_without_tutors[["CanonicalName", "DNI", "NIE", "Pasaporte", "BirthDate"]]
+    #     logger.info(players_without_tutors[["CanonicalName", "DNI", "NIE", "Pasaporte", "BirthDate"]]
     #           .to_string(index=False))
-    # print("-" * 60)
+    # logger.info("-" * 60)
 
     # Statistics for not_found tutors
     count_tutor1_not_found = len(tutor1_not_found)
     count_tutor2_not_found = len(tutor2_not_found)
-    print("=" * 60)
-    print("NOT FOUND TUTORS STATISTICS")
-    print("=" * 60)
-    print(f"Players with Tutor1 not found: {count_tutor1_not_found}")
-    print(f"Players with Tutor2 not found: {count_tutor2_not_found}")
+    logger.debug("=" * 60)
+    logger.debug("NOT FOUND TUTORS STATISTICS")
+    logger.debug("=" * 60)
+    logger.debug(f"Players with Tutor1 not found: {count_tutor1_not_found}")
+    logger.debug(f"Players with Tutor2 not found: {count_tutor2_not_found}")
     # if count_tutor1_not_found > 0:
-    #     print(f"\nPlayers with Tutor1 not found ({count_tutor1_not_found}):")
-    #     print(tutor1_not_found[["CanonicalName", "Tutor1"]].to_string(index=False))
+    #     logger.debug(f"\nPlayers with Tutor1 not found ({count_tutor1_not_found}):")
+    #     logger.debug(tutor1_not_found[["CanonicalName", "Tutor1"]].to_string(index=False))
     # if count_tutor2_not_found > 0:
-    #     print(f"\nPlayers with Tutor2 not found ({count_tutor2_not_found}):")
-    #     print(tutor2_not_found[["CanonicalName", "Tutor2"]].to_string(index=False))
-    print("-" * 60)
+    #     logger.debug(f"\nPlayers with Tutor2 not found ({count_tutor2_not_found}):")
+    #     logger.debug(tutor2_not_found[["CanonicalName", "Tutor2"]].to_string(index=False))
+    logger.debug("-" * 60)
 
     # Statistics for players without any ID (player and tutors)
     count_without_any_id = len(players_without_any_id)
-    print("=" * 60)
-    print("PLAYERS WITHOUT ANY ID (PLAYER AND TUTORS)")
-    print("=" * 60)
-    print(f"Players without DNI/NIE/Passport where tutors also lack IDs: {count_without_any_id}")
+    logger.debug("=" * 60)
+    logger.debug("PLAYERS WITHOUT ANY ID (PLAYER AND TUTORS)")
+    logger.debug("=" * 60)
+    logger.debug(f"Players without DNI/NIE/Passport where tutors also lack IDs: {count_without_any_id}")
     # if count_without_any_id > 0:
     #     players_without_any_id_sorted = players_without_any_id.sort_values(by="BirthDate")
-    #     print(players_without_any_id_sorted[["CanonicalName", "BirthDate", "Tutor1", "Tutor2"]]
+    #     logger.info(players_without_any_id_sorted[["CanonicalName", "BirthDate", "Tutor1", "Tutor2"]]
     #           .to_string(index=False))
-    print("-" * 60)
+    logger.debug("-" * 60)
 
 
 def main():
+    logger.info("Loading Media Day players...")
     media_day_path = os.environ.get("CBTC_MEDIA_DAY_PATH", "data/cbtc_media_day.csv")
-
     media_day_all_df = pd.read_csv(media_day_path, encoding="utf-8")
     media_day_all_df = add_canonical_name_column(media_day_all_df)
-    print(f"Loaded {len(media_day_all_df)} rows")
-    # print(media_day_all_df.to_string())
+    logger.info(f"Loaded {len(media_day_all_df)} rows")
 
+    logger.info("Loading CBTC members...")
     players_tutors_path = os.environ.get("CBTC_ALL_PLAYERS_PATH", "data/cbtc_all.xlsx")
-
     all_df = load_excel(players_tutors_path)
-    print(f"Loaded {len(all_df)} rows")
+    logger.info(f"Loaded {len(all_df)} rows")
+
+    logger.info("Processing CBTC members")
+    logger.info("Starting transformations")
     all_df["BirthDate"] = pd.to_datetime(all_df["Fecha nac."], errors="coerce", dayfirst=True)
 
     players_df = generate_players_df(all_df)
+    logger.info(f"Extracted {len(players_df)} members with role Player or Fan")
+
     tutors_df = generate_tutors_df(all_df)
+    logger.info(f"Extracted {len(tutors_df)} members with role Tutor")
+
+    logger.info("Aggregating Tutor information to Player/Fan...")
     players_df = merge_tutor_info(players_df, tutors_df)
 
     # Find media day players in players_df and print statistics
+    logger.info("Aggregating CBTC membership information to Media Day players...")
     media_day_found, media_day_not_found = find_media_day_players_in_players_df(media_day_all_df, players_df)
-    print_media_day_statistics(media_day_found, media_day_not_found)
 
+    # Show all media day players found
+    logger.info(f"Media Day players found in CBTC members: {len(media_day_found)}")
+    pd.set_option("display.max_columns", None)
+    pd.set_option("display.width", None)
+    pd.set_option("display.max_colwidth", 30)
+    # Print all columns
+    logger.info(media_day_found.to_string(index=False))
+
+    # Statistics
+    print_media_day_statistics(media_day_found, media_day_not_found)
     players_with_both = players_df[(players_df["Tutor1"] != "") & (players_df["Tutor2"] != "")]
     players_with_tutor1_only = players_df[(players_df["Tutor1"] != "") & (players_df["Tutor2"] == "")]
     players_with_tutor2_only = players_df[(players_df["Tutor1"] == "") & (players_df["Tutor2"] != "")]

@@ -1,5 +1,11 @@
 import pandas as pd
-from main import add_canonical_name_column, find_media_day_players_in_players_df, to_ascii, to_canonical
+from main import (
+    add_canonical_name_column,
+    find_media_day_players_in_players_df,
+    merge_tutor_info,
+    to_ascii,
+    to_canonical,
+)
 
 
 class TestToAscii:
@@ -139,3 +145,59 @@ class TestFindMediaDayPlayersInPlayersDF:
 
         assert len(found) == 1
         assert len(not_found) == 1  # Empty canonical name is not found
+
+
+class TestMergeTutorInfo:
+    def test_logs_warning_when_tutor_not_found(self, caplog):
+        """Test that a warning is logged when a tutor is not found in tutors_df."""
+        players_df = pd.DataFrame(
+            {
+                "CanonicalName": ["player1"],
+                "Tutor1": ["tutor1"],
+                "Tutor2": [""],
+                "DNI": ["12345678A"],
+                "NIE": [""],
+                "Pasaporte": [""],
+            }
+        )
+        tutors_df = pd.DataFrame(
+            {"CanonicalName": ["other_tutor"], "DNI": ["87654321B"], "NIE": [""], "Pasaporte": [""]}
+        )
+
+        result = merge_tutor_info(players_df, tutors_df)
+
+        # Check that warning was logged
+        assert any("Tutor1 'tutor1' not found" in record.message for record in caplog.records)
+        # Check that Tutor1 was marked as not_found
+        assert result["Tutor1"].iloc[0] == "not_found"
+
+    def test_merges_tutor_info_successfully(self):
+        """Test that tutor information is correctly merged into players dataframe."""
+        players_df = pd.DataFrame(
+            {
+                "CanonicalName": ["player1"],
+                "Tutor1": ["tutor1"],
+                "Tutor2": ["tutor2"],
+                "DNI": ["12345678A"],
+                "NIE": [""],
+                "Pasaporte": [""],
+            }
+        )
+        tutors_df = pd.DataFrame(
+            {
+                "CanonicalName": ["tutor1", "tutor2"],
+                "DNI": ["11111111A", "22222222B"],
+                "NIE": ["X1111111A", ""],
+                "Pasaporte": ["", "P222222"],
+            }
+        )
+
+        result = merge_tutor_info(players_df, tutors_df)
+
+        # Check that tutor info was merged
+        assert result["Tutor1DNI"].iloc[0] == "11111111A"
+        assert result["Tutor1NIE"].iloc[0] == "X1111111A"
+        assert result["Tutor1Passport"].iloc[0] == ""
+        assert result["Tutor2DNI"].iloc[0] == "22222222B"
+        assert result["Tutor2NIE"].iloc[0] == ""
+        assert result["Tutor2Passport"].iloc[0] == "P222222"
