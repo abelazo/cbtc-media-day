@@ -7,13 +7,13 @@ default_install_hook_types:
 
 repos:
   - repo: https://github.com/ambv/black
-    rev: 25.1.0
+    rev: 26.1.0
     hooks:
       - id: black
         args: [--line-length=120]
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.12.11
+    rev: v0.14.14
     hooks:
       - id: ruff
         args: [--fix, --line-length=120]
@@ -29,24 +29,24 @@ repos:
       - id: mixed-line-ending
 
   - repo: https://github.com/commitizen-tools/commitizen
-    rev: v4.8.3
+    rev: v4.12.1
     hooks:
       - id: commitizen
 
   - repo: https://github.com/adrienverge/yamllint
-    rev: v1.37.1
+    rev: v1.38.0
     hooks:
       - id: yamllint
         args: [-d, "{rules: {line-length: {max: 120}}}"]
 
   - repo: https://github.com/sirosen/check-jsonschema
-    rev: 0.33.3
+    rev: 0.36.1
     hooks:
       - id: check-github-actions
       - id: check-github-workflows
 
   - repo: https://github.com/antonbabenko/pre-commit-terraform
-    rev: v1.96.1
+    rev: v1.105.0
     hooks:
       - id: terraform_fmt
       - id: terraform_validate

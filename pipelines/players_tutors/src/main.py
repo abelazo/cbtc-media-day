@@ -97,7 +97,8 @@ def generate_players_df(all_df: pd.DataFrame) -> pd.DataFrame:
     # Filter for players (Deportista) or Fans
     is_player = all_df["Roles"].str.contains("Deportista", na=False)
     is_strict_fan = all_df["Roles"].fillna("").str.strip() == "Fan"
-    players_df = all_df[is_player | is_strict_fan].copy()
+    is_fan_socio = all_df["Roles"].fillna("").str.strip() == "Fan/Socio"
+    players_df = all_df[is_player | is_strict_fan | is_fan_socio].copy()
     players_df = add_canonical_name_column(players_df)
     players_df = add_tutor_columns(players_df)
     return players_df
@@ -161,8 +162,6 @@ def merge_tutor_info(players_df: pd.DataFrame, tutors_df: pd.DataFrame) -> pd.Da
 def has_no_id(row):
     # Check player has no ID
     player_no_id = pd.isna(row["Player_DNI"]) and pd.isna(row["Player_NIE"]) and pd.isna(row["Player_Pasaporte"])
-    if not player_no_id:
-        return False
     # Check Tutor1 has no ID (empty tutor or tutor without IDs)
     tutor1_no_id = (
         row["Player_Tutor1"] == ""
@@ -183,7 +182,7 @@ def has_no_id(row):
             and (pd.isna(row["Player_Tutor2Passport"]) or row["Player_Tutor2Passport"] == "")
         )
     )
-    return tutor1_no_id and tutor2_no_id
+    return player_no_id and tutor1_no_id and tutor2_no_id
 
 
 def find_media_day_players_in_players_df(
@@ -326,10 +325,11 @@ def print_statistics(
     logger.debug("PLAYERS WITHOUT ANY ID (PLAYER AND TUTORS)")
     logger.debug("=" * 60)
     logger.debug(f"Players without DNI/NIE/Passport where tutors also lack IDs: {count_without_any_id}")
-    # if count_without_any_id > 0:
-    #     players_without_any_id_sorted = players_without_any_id.sort_values(by="BirthDate")
-    #     logger.info(players_without_any_id_sorted[["CanonicalName", "BirthDate", "Tutor1", "Tutor2"]]
-    #           .to_string(index=False))
+    if count_without_any_id > 0:
+        players_without_any_id_sorted = players_without_any_id.sort_values(by="BirthDate")
+        logger.debug(
+            players_without_any_id_sorted[["CanonicalName", "BirthDate", "Tutor1", "Tutor2"]].to_string(index=False)
+        )
     logger.debug("-" * 60)
 
 
@@ -373,6 +373,7 @@ def main():
     final_media_day_df = media_day_found[
         [
             "CanonicalName",
+            "Equipo",
             "Player_DNI",
             "Player_NIE",
             "Player_Pasaporte",
