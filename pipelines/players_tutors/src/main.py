@@ -30,6 +30,14 @@ def to_ascii(text: str) -> str:
     return unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("ascii")
 
 
+def normalize_dni(dni_value) -> str | None:
+    if pd.isna(dni_value) or str(dni_value).strip() == "":
+        return None
+
+    dni = str(dni_value).strip().upper().lstrip("0")
+    return dni
+
+
 def to_canonical(text: str) -> str:
     """Convert text to canonical format: ASCII lowercase with single underscores replacing spaces."""
     if not text:
@@ -325,11 +333,11 @@ def print_statistics(
     logger.debug("PLAYERS WITHOUT ANY ID (PLAYER AND TUTORS)")
     logger.debug("=" * 60)
     logger.debug(f"Players without DNI/NIE/Passport where tutors also lack IDs: {count_without_any_id}")
-    if count_without_any_id > 0:
-        players_without_any_id_sorted = players_without_any_id.sort_values(by="BirthDate")
-        logger.debug(
-            players_without_any_id_sorted[["CanonicalName", "BirthDate", "Tutor1", "Tutor2"]].to_string(index=False)
-        )
+    # if count_without_any_id > 0:
+    #     players_without_any_id_sorted = players_without_any_id.sort_values(by="BirthDate")
+    #     logger.debug(
+    #         players_without_any_id_sorted[["CanonicalName", "BirthDate", "Tutor1", "Tutor2"]].to_string(index=False)
+    #     )
     logger.debug("-" * 60)
 
 
@@ -388,6 +396,10 @@ def main():
             "Player_Tutor2Passport",
         ]
     ].copy()
+
+    # Validate and normalize DNI columns (replace invalid DNIs with None)
+    for dni_col in ["Player_DNI", "Player_Tutor1DNI", "Player_Tutor2DNI"]:
+        final_media_day_df[dni_col] = final_media_day_df[dni_col].apply(normalize_dni)
 
     # Show all media day players found
     found_pct = (len(final_media_day_df) / len(media_day_players) * 100) if len(media_day_players) > 0 else 0

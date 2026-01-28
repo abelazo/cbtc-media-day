@@ -1,5 +1,5 @@
 import pandas as pd
-from main import (
+from src.main import (
     add_canonical_name_column,
     find_media_day_players_in_players_df,
     merge_tutor_info,
