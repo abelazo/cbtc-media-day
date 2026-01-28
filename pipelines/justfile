@@ -3,6 +3,9 @@
 # CBTC players and tutors pipelines
 mod players-tutors 'players_tutors'
 
+# Players data uploader pipeline
+mod player-data-uploader 'player_data_uploader'
+
 # Default recipe - show available commands
 help:
     @just --list

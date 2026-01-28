@@ -1,0 +1,1 @@
+# Players data uploader tests

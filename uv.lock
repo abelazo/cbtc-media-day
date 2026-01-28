@@ -7,6 +7,7 @@ members = [
     "authorizer",
     "cbtc-media-day",
     "content-service",
+    "player-data-uploader",
     "players-tutors",
 ]
 
@@ -557,6 +558,28 @@ sdist = { url = "https://files.pythonhosted.org/packages/61/33/9611380c2bdb1225f
 wheels = [
     { url = "https://files.pythonhosted.org/packages/73/cb/ac7874b3e5d58441674fb70742e6c374b28b0c7cb988d37d991cde47166c/platformdirs-4.5.0-py3-none-any.whl", hash = "sha256:e578a81bb873cbb89a41fcc904c7ef523cc18284b7e3b3ccf06aca1403b7ebd3", size = 18651, upload-time = "2025-10-08T17:44:47.223Z" },
 ]
+
+[[package]]
+name = "player-data-uploader"
+version = "0.1.0"
+source = { editable = "pipelines/player_data_uploader" }
+dependencies = [
+    { name = "pandas" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "pytest" },
+    { name = "pytest-cov" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "pandas", specifier = ">=2.2.0" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=9.0.2" },
+    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=7.0.0" },
+]
+provides-extras = ["dev"]
 
 [[package]]
 name = "players-tutors"
