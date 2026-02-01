@@ -12,7 +12,13 @@ export default function DocumentIdForm() {
 
         try {
             const apiUrl = import.meta.env.VITE_API_URL || '';
-            const credentials = `Basic ${btoa(`${documentId}:${name}`)}`;
+            const normalizedName = name
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .trim()
+                .toLowerCase()
+                .replace(/\s+/g, '_');
+            const credentials = `Basic ${btoa(`${documentId}:${normalizedName}`)}`;
 
             const response = await fetch(`${apiUrl}/content`, {
                 headers: {
