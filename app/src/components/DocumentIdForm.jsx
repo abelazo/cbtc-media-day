@@ -63,7 +63,11 @@ export default function DocumentIdForm() {
     return (
         <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: '1rem' }}>
-                <label htmlFor="name" style={{ display: 'block', marginBottom: '0.5rem' }}>Nombre completo del jugador/a</label>
+                <label htmlFor="name" style={{ display: 'block', marginBottom: '0.5rem' }}>
+                    Nombre completo y apellidos del jugador/a
+                    <br />
+                    <span style={{ fontSize: '0.85em', fontStyle: 'italic' }}>(según lo registrado en https://cbtrescantos.es)</span>
+                </label>
                 <input
                     id="name"
                     type="text"
