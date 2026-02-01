@@ -56,7 +56,7 @@ export default function DocumentIdForm() {
             }
         } catch (error) {
             console.error(error);
-            setMessage('No se puede verificar que exista relación entre el número de documento y el nombre proporcionado');
+            setMessage('No se puede verificar que exista relación entre el número de documento y el nombre de jugador/a proporcionados');
         }
     };
 
@@ -77,7 +77,11 @@ export default function DocumentIdForm() {
                 />
             </div>
             <div style={{ marginBottom: '1rem' }}>
-                <label htmlFor="documentId" style={{ display: 'block', marginBottom: '0.5rem' }}>Numero de Documento (DNI, NIE, Pasaporte) del jugador o tutores asociados</label>
+                <label htmlFor="documentId" style={{ display: 'block', marginBottom: '0.5rem' }}>
+                  Numero de Documento (DNI, NIE, Pasaporte) del jugador o tutores asociados
+                  <br />
+                  <span style={{ fontSize: '0.85em', fontStyle: 'italic' }}>(según lo registrado en https://cbtrescantos.es)</span>
+                </label>
                 <input
                     id="documentId"
                     type="text"
