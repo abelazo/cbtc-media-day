@@ -90,7 +90,7 @@ export default function DocumentIdForm() {
                     style={{ padding: '0.5rem', width: '100%' }}
                 />
             </div>
-            <button type="submit" style={{ padding: '0.5rem 1rem' }}>Enviar</button>
+            <button type="submit" disabled={!name.trim() || !documentId.trim()} style={{ padding: '0.5rem 1rem' }}>Enviar</button>
             {message && <div style={{ marginTop: '1rem', color: message.type === 'error' ? 'red' : message.type === 'success' ? 'green' : 'inherit' }}>{message.text}</div>}
         </form>
     );
