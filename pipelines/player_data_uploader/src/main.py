@@ -1,7 +1,7 @@
-import json
 import logging
 import os
 
+import boto3
 import pandas as pd
 
 from .logger import get_logger
@@ -66,10 +66,25 @@ def generate_players_data(df: pd.DataFrame) -> list[dict]:
     return players_data
 
 
+def upload_players_data(players_data: list[dict], table_name: str, dynamodb_resource=None) -> None:
+    """Upload player data items to DynamoDB users table."""
+    if dynamodb_resource is None:
+        dynamodb_resource = boto3.resource("dynamodb")
+
+    table = dynamodb_resource.Table(table_name)
+
+    with table.batch_writer() as batch:
+        for player in players_data:
+            batch.put_item(Item=player)
+
+    logger.info(f"Uploaded {len(players_data)} items to {table_name}")
+
+
 def main():
     logger.info("Starting players data uploader pipeline")
 
     input_path = os.environ.get("CBTC_MEDIA_DAY_OUTPUT_PATH", "output/cbtc_media_day_players.csv")
+    table_name = os.environ.get("CBTC_PLAYERS_TABLE_NAME", "players")
 
     logger.info(f"Reading CSV from {input_path}")
     df = pd.read_csv(input_path, encoding="utf-8")
@@ -78,7 +93,9 @@ def main():
     logger.info("Generating player data")
     players_data = generate_players_data(df)
 
-    print(json.dumps(players_data, indent=2, ensure_ascii=False))
+    players_data = players_data[:2]  # TODO: Remove this line after testing
+    logger.info(f"Uploading {len(players_data)} players to DynamoDB table '{table_name}'")
+    upload_players_data(players_data, table_name)
 
 
 if __name__ == "__main__":

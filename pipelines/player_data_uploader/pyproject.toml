@@ -5,6 +5,7 @@ description = "Pipeline to generate JSON data from media day CSV for upload"
 requires-python = ">=3.12"
 dependencies = [
     "pandas>=2.2.0",
+    "boto3>=1.42.39",
 ]
 
 [project.optional-dependencies]

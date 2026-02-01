@@ -1,8 +1,11 @@
+from unittest.mock import MagicMock
+
 import pandas as pd
 from src.main import (
     DNI_COLUMNS,
     generate_players_data,
     row_to_player_data,
+    upload_players_data,
 )
 
 
@@ -172,6 +175,60 @@ class TestGeneratePlayersData:
         result = generate_players_data(df)
 
         assert result == []
+
+
+class TestUploadPlayersData:
+    def test_uploads_all_players(self):
+        mock_dynamodb = MagicMock()
+        mock_table = MagicMock()
+        mock_batch_writer = MagicMock()
+        mock_dynamodb.Table.return_value = mock_table
+        mock_table.batch_writer.return_value.__enter__ = MagicMock(return_value=mock_batch_writer)
+        mock_table.batch_writer.return_value.__exit__ = MagicMock(return_value=False)
+
+        players_data = [
+            {
+                "username": "player1",
+                "dnis": ["11111111H"],
+                "photos": ["player1/001.png", "player1/002.png", "Teams/Team A.png"],
+            },
+            {
+                "username": "player2",
+                "dnis": ["22222222J", "X1234567A"],
+                "photos": ["player2/001.png", "player2/002.png", "Teams/Team B.png"],
+            },
+        ]
+
+        upload_players_data(players_data, "users", dynamodb_resource=mock_dynamodb)
+
+        mock_dynamodb.Table.assert_called_once_with("users")
+        assert mock_batch_writer.put_item.call_count == 2
+        mock_batch_writer.put_item.assert_any_call(Item=players_data[0])
+        mock_batch_writer.put_item.assert_any_call(Item=players_data[1])
+
+    def test_uploads_empty_list(self):
+        mock_dynamodb = MagicMock()
+        mock_table = MagicMock()
+        mock_batch_writer = MagicMock()
+        mock_dynamodb.Table.return_value = mock_table
+        mock_table.batch_writer.return_value.__enter__ = MagicMock(return_value=mock_batch_writer)
+        mock_table.batch_writer.return_value.__exit__ = MagicMock(return_value=False)
+
+        upload_players_data([], "users", dynamodb_resource=mock_dynamodb)
+
+        mock_batch_writer.put_item.assert_not_called()
+
+    def test_uses_correct_table_name(self):
+        mock_dynamodb = MagicMock()
+        mock_table = MagicMock()
+        mock_batch_writer = MagicMock()
+        mock_dynamodb.Table.return_value = mock_table
+        mock_table.batch_writer.return_value.__enter__ = MagicMock(return_value=mock_batch_writer)
+        mock_table.batch_writer.return_value.__exit__ = MagicMock(return_value=False)
+
+        upload_players_data([], "my_custom_table", dynamodb_resource=mock_dynamodb)
+
+        mock_dynamodb.Table.assert_called_once_with("my_custom_table")
 
 
 class TestDniColumns:
