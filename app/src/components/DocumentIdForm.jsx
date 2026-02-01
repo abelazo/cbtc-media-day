@@ -4,11 +4,11 @@ import React, { useState } from 'react';
 export default function DocumentIdForm() {
     const [documentId, setDocumentId] = useState('');
     const [name, setName] = useState('');
-    const [message, setMessage] = useState('');
+    const [message, setMessage] = useState(null);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setMessage('Procesando...');
+        setMessage({ type: 'info', text: 'Procesando...' });
 
         try {
             const apiUrl = import.meta.env.VITE_API_URL || '';
@@ -48,15 +48,15 @@ export default function DocumentIdForm() {
                 document.body.removeChild(link);
                 window.URL.revokeObjectURL(url);
 
-                setMessage('¡Descarga completada! Revisa tu carpeta de descargas.');
+                setMessage({ type: 'success', text: '✅ ¡Descarga completada! Revisa tu carpeta de descargas.' });
             } else if (response.status === 404) {
-                setMessage('Error (' + response.status + ') : No hay fotos asociadas a este jugador');
+                setMessage({ type: 'error', text: '❌ Error (' + response.status + ') : No hay fotos asociadas a este jugador' });
             } else {
-                setMessage('Error (' + response.status + ') :' + response.statusText);
+                setMessage({ type: 'error', text: '❌ Error (' + response.status + ') : ' + response.statusText });
             }
         } catch (error) {
             console.error(error);
-            setMessage('No se puede verificar que exista relación entre el número de documento y el nombre de jugador/a proporcionados');
+            setMessage({ type: 'error', text: '❌ No se puede verificar que exista relación entre el número de documento y el nombre de jugador/a proporcionados' });
         }
     };
 
@@ -91,7 +91,7 @@ export default function DocumentIdForm() {
                 />
             </div>
             <button type="submit" style={{ padding: '0.5rem 1rem' }}>Enviar</button>
-            {message && <div style={{ marginTop: '1rem' }}>{message}</div>}
+            {message && <div style={{ marginTop: '1rem', color: message.type === 'error' ? 'red' : message.type === 'success' ? 'green' : 'inherit' }}>{message.text}</div>}
         </form>
     );
 }
