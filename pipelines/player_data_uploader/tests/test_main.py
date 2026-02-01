@@ -30,7 +30,7 @@ class TestRowToPlayerData:
         assert "12345678Z" in result["dnis"]
         assert "X1234567A" in result["dnis"]
         assert "AAA123456" in result["dnis"]
-        assert result["photos"] == ["juan_garcia/001.png", "Teams/Infantil A.png"]
+        assert result["photos"] == ["juan_garcia/001.png", "juan_garcia/002.png", "Teams/Infantil A.png"]
 
     def test_some_dnis_null(self):
         row = pd.Series(
@@ -54,7 +54,7 @@ class TestRowToPlayerData:
         assert len(result["dnis"]) == 2
         assert "12345678Z" in result["dnis"]
         assert "11111111H" in result["dnis"]
-        assert result["photos"] == ["maria_lopez/001.png", "Teams/Alevin B.png"]
+        assert result["photos"] == ["maria_lopez/001.png", "maria_lopez/002.png", "Teams/Alevin B.png"]
 
     def test_no_dnis(self):
         row = pd.Series(
@@ -76,7 +76,7 @@ class TestRowToPlayerData:
 
         assert result["username"] == "pedro_sanchez"
         assert result["dnis"] == []
-        assert result["photos"] == ["pedro_sanchez/001.png", "Teams/Cadete.png"]
+        assert result["photos"] == ["pedro_sanchez/001.png", "pedro_sanchez/002.png", "Teams/Cadete.png"]
 
     def test_whitespace_only_dnis_excluded(self):
         row = pd.Series(
@@ -137,7 +137,7 @@ class TestRowToPlayerData:
         )
         result = row_to_player_data(row)
 
-        assert result["photos"] == ["luis_fernandez/001.png", "Teams/Prebenjamin.png"]
+        assert result["photos"] == ["luis_fernandez/001.png", "luis_fernandez/002.png", "Teams/Prebenjamin.png"]
 
 
 class TestGeneratePlayersData:
@@ -162,10 +162,10 @@ class TestGeneratePlayersData:
         assert len(result) == 2
         assert result[0]["username"] == "player1"
         assert result[0]["dnis"] == ["11111111H"]
-        assert result[0]["photos"] == ["player1/001.png", "Teams/Team A.png"]
+        assert result[0]["photos"] == ["player1/001.png", "player1/002.png", "Teams/Team A.png"]
         assert result[1]["username"] == "player2"
         assert len(result[1]["dnis"]) == 2
-        assert result[1]["photos"] == ["player2/001.png", "Teams/Team B.png"]
+        assert result[1]["photos"] == ["player2/001.png", "player2/002.png", "Teams/Team B.png"]
 
     def test_empty_dataframe(self):
         df = pd.DataFrame(columns=["CanonicalName", "Equipo"] + DNI_COLUMNS)

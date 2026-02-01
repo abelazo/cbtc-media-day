@@ -46,6 +46,7 @@ def row_to_player_data(row: pd.Series) -> dict:
 
     photos = [
         f"{canonical_name}/001.png",
+        f"{canonical_name}/002.png",
         f"Teams/{equipo}.png",
     ]
 
