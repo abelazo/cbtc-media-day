@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 
 export default function DocumentIdForm() {
     const [documentId, setDocumentId] = useState('');
-    const [nombre, setNombre] = useState('');
+    const [name, setName] = useState('');
     const [message, setMessage] = useState('');
 
     const handleSubmit = async (e) => {
@@ -12,7 +12,7 @@ export default function DocumentIdForm() {
 
         try {
             const apiUrl = import.meta.env.VITE_API_URL || '';
-            const credentials = `Basic ${btoa(`${documentId}:${nombre}`)}`;
+            const credentials = `Basic ${btoa(`${documentId}:${name}`)}`;
 
             const response = await fetch(`${apiUrl}/content`, {
                 headers: {
@@ -57,17 +57,17 @@ export default function DocumentIdForm() {
     return (
         <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: '1rem' }}>
-                <label htmlFor="nombre" style={{ display: 'block', marginBottom: '0.5rem' }}>Nombre</label>
+                <label htmlFor="name" style={{ display: 'block', marginBottom: '0.5rem' }}>Nombre completo del jugador/a</label>
                 <input
-                    id="nombre"
+                    id="name"
                     type="text"
-                    value={nombre}
-                    onChange={(e) => setNombre(e.target.value)}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
                     style={{ padding: '0.5rem', width: '100%' }}
                 />
             </div>
             <div style={{ marginBottom: '1rem' }}>
-                <label htmlFor="documentId" style={{ display: 'block', marginBottom: '0.5rem' }}>Document ID</label>
+                <label htmlFor="documentId" style={{ display: 'block', marginBottom: '0.5rem' }}>Numero de Documento</label>
                 <input
                     id="documentId"
                     type="text"

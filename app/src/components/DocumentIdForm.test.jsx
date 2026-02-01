@@ -17,13 +17,13 @@ describe('DocumentIdForm', () => {
         render(<DocumentIdForm />);
 
         const documentIdInput = screen.getByLabelText(/Document ID/i);
-        const nombreInput = screen.getByLabelText(/Nombre/i);
+        const nameInput = screen.getByLabelText(/Nombre/i);
 
         fireEvent.change(documentIdInput, { target: { value: '12345678A' } });
-        fireEvent.change(nombreInput, { target: { value: 'ValidUser' } });
+        fireEvent.change(nameInput, { target: { value: 'ValidUser' } });
 
         expect(documentIdInput.value).toBe('12345678A');
-        expect(nombreInput.value).toBe('ValidUser');
+        expect(nameInput.value).toBe('ValidUser');
     });
 
     test('handles successful download', async () => {
