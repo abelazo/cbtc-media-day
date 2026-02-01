@@ -67,7 +67,7 @@ export default function DocumentIdForm() {
                 />
             </div>
             <div style={{ marginBottom: '1rem' }}>
-                <label htmlFor="documentId" style={{ display: 'block', marginBottom: '0.5rem' }}>Numero de Documento</label>
+                <label htmlFor="documentId" style={{ display: 'block', marginBottom: '0.5rem' }}>Numero de Documento (DNI, NIE, Pasaporte) del jugador o tutores asociados</label>
                 <input
                     id="documentId"
                     type="text"
