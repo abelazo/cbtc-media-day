@@ -93,7 +93,6 @@ def main():
     logger.info("Generating player data")
     players_data = generate_players_data(df)
 
-    players_data = players_data[:2]  # TODO: Remove this line after testing
     logger.info(f"Uploading {len(players_data)} players to DynamoDB table '{table_name}'")
     upload_players_data(players_data, table_name)
 
