@@ -1,5 +1,5 @@
 
-import DniForm from './components/DniForm'
+import DocumentIdForm from './components/DocumentIdForm'
 import './App.css'
 
 function App() {
@@ -7,7 +7,7 @@ function App() {
     <div className="App">
       <h1>CBTC Media Day 2025</h1>
       <div className="card">
-        <DniForm />
+        <DocumentIdForm />
       </div>
     </div>
   )

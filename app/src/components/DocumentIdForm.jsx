@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
 
-export default function DniForm() {
-    const [dni, setDni] = useState('');
+export default function DocumentIdForm() {
+    const [documentId, setDocumentId] = useState('');
     const [nombre, setNombre] = useState('');
     const [message, setMessage] = useState('');
 
@@ -12,7 +12,7 @@ export default function DniForm() {
 
         try {
             const apiUrl = import.meta.env.VITE_API_URL || '';
-            const credentials = `Basic ${btoa(`${dni}:${nombre}`)}`;
+            const credentials = `Basic ${btoa(`${documentId}:${nombre}`)}`;
 
             const response = await fetch(`${apiUrl}/content`, {
                 headers: {
@@ -50,7 +50,7 @@ export default function DniForm() {
             }
         } catch (error) {
             console.error(error);
-            setMessage('No se puede verificar la relación entre el DNI y el nombre proporcionado');
+            setMessage('No se puede verificar que exista relación entre el número de documento y el nombre proporcionado');
         }
     };
 
@@ -67,12 +67,12 @@ export default function DniForm() {
                 />
             </div>
             <div style={{ marginBottom: '1rem' }}>
-                <label htmlFor="dni" style={{ display: 'block', marginBottom: '0.5rem' }}>DNI</label>
+                <label htmlFor="documentId" style={{ display: 'block', marginBottom: '0.5rem' }}>Document ID</label>
                 <input
-                    id="dni"
+                    id="documentId"
                     type="text"
-                    value={dni}
-                    onChange={(e) => setDni(e.target.value)}
+                    value={documentId}
+                    onChange={(e) => setDocumentId(e.target.value)}
                     style={{ padding: '0.5rem', width: '100%' }}
                 />
             </div>

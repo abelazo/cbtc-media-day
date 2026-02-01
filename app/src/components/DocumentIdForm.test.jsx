@@ -1,28 +1,28 @@
 
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import DniForm from './DniForm';
+import DocumentIdForm from './DocumentIdForm';
 import { describe, test, expect, vi } from 'bun:test';
 
-describe('DniForm', () => {
+describe('DocumentIdForm', () => {
     test('renders form elements', () => {
-        render(<DniForm />);
+        render(<DocumentIdForm />);
 
         // Use getByLabelText to encourage accessibility
-        expect(screen.getByLabelText(/DNI/i)).toBeTruthy();
+        expect(screen.getByLabelText(/Document ID/i)).toBeTruthy();
         expect(screen.getByLabelText(/Nombre/i)).toBeTruthy();
         expect(screen.getByRole('button', { name: /Enviar/i })).toBeTruthy();
     });
 
     test('updates values on change', () => {
-        render(<DniForm />);
+        render(<DocumentIdForm />);
 
-        const dniInput = screen.getByLabelText(/DNI/i);
+        const documentIdInput = screen.getByLabelText(/Document ID/i);
         const nombreInput = screen.getByLabelText(/Nombre/i);
 
-        fireEvent.change(dniInput, { target: { value: '12345678A' } });
+        fireEvent.change(documentIdInput, { target: { value: '12345678A' } });
         fireEvent.change(nombreInput, { target: { value: 'ValidUser' } });
 
-        expect(dniInput.value).toBe('12345678A');
+        expect(documentIdInput.value).toBe('12345678A');
         expect(nombreInput.value).toBe('ValidUser');
     });
 
@@ -56,9 +56,9 @@ describe('DniForm', () => {
             return originalCreateElement(tag);
         });
 
-        render(<DniForm />);
+        render(<DocumentIdForm />);
 
-        fireEvent.change(screen.getByLabelText(/DNI/i), { target: { value: '123' } });
+        fireEvent.change(screen.getByLabelText(/Document ID/i), { target: { value: '123' } });
         fireEvent.change(screen.getByLabelText(/Nombre/i), { target: { value: 'User' } });
         fireEvent.click(screen.getByRole('button', { name: /Enviar/i }));
 
@@ -90,9 +90,9 @@ describe('DniForm', () => {
         });
         global.fetch = fetchMock;
 
-        render(<DniForm />);
+        render(<DocumentIdForm />);
 
-        fireEvent.change(screen.getByLabelText(/DNI/i), { target: { value: '123' } });
+        fireEvent.change(screen.getByLabelText(/Document ID/i), { target: { value: '123' } });
         fireEvent.change(screen.getByLabelText(/Nombre/i), { target: { value: 'User' } });
         fireEvent.click(screen.getByRole('button', { name: /Enviar/i }));
 
