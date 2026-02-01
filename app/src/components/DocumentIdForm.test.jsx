@@ -8,16 +8,16 @@ describe('DocumentIdForm', () => {
         render(<DocumentIdForm />);
 
         // Use getByLabelText to encourage accessibility
-        expect(screen.getByLabelText(/Document ID/i)).toBeTruthy();
-        expect(screen.getByLabelText(/Nombre/i)).toBeTruthy();
+        expect(screen.getByLabelText(/Numero de Documento/i)).toBeTruthy();
+        expect(screen.getByLabelText(/Nombre completo/i)).toBeTruthy();
         expect(screen.getByRole('button', { name: /Enviar/i })).toBeTruthy();
     });
 
     test('updates values on change', () => {
         render(<DocumentIdForm />);
 
-        const documentIdInput = screen.getByLabelText(/Document ID/i);
-        const nameInput = screen.getByLabelText(/Nombre/i);
+        const documentIdInput = screen.getByLabelText(/Numero de Documento/i);
+        const nameInput = screen.getByLabelText(/Nombre completo/i);
 
         fireEvent.change(documentIdInput, { target: { value: '12345678A' } });
         fireEvent.change(nameInput, { target: { value: 'ValidUser' } });
@@ -58,8 +58,8 @@ describe('DocumentIdForm', () => {
 
         render(<DocumentIdForm />);
 
-        fireEvent.change(screen.getByLabelText(/Document ID/i), { target: { value: '123' } });
-        fireEvent.change(screen.getByLabelText(/Nombre/i), { target: { value: 'User' } });
+        fireEvent.change(screen.getByLabelText(/Numero de Documento/i), { target: { value: '123' } });
+        fireEvent.change(screen.getByLabelText(/Nombre completo/i), { target: { value: 'User' } });
         fireEvent.click(screen.getByRole('button', { name: /Enviar/i }));
 
         // Wait for async operations and state updates
@@ -92,8 +92,8 @@ describe('DocumentIdForm', () => {
 
         render(<DocumentIdForm />);
 
-        fireEvent.change(screen.getByLabelText(/Document ID/i), { target: { value: '123' } });
-        fireEvent.change(screen.getByLabelText(/Nombre/i), { target: { value: 'User' } });
+        fireEvent.change(screen.getByLabelText(/Numero de Documento/i), { target: { value: '123' } });
+        fireEvent.change(screen.getByLabelText(/Nombre completo/i), { target: { value: 'User' } });
         fireEvent.click(screen.getByRole('button', { name: /Enviar/i }));
 
         // Wait for async operations and state updates
