@@ -70,5 +70,5 @@ jobs:
       - name: Terraform Plan
         run: just plan dev
 
-#      - name: Terraform Apply
-#        run: just apply dev --auto-approve
+      - name: Terraform Apply
+        run: just apply dev --auto-approve
