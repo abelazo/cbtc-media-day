@@ -2,15 +2,15 @@
 name: Deploy
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - '.github/workflows/deploy.yml'
-      - '.github/workflows/tests-*.yml'
-      - 'infra/**'
-      - 'services/**'
-      - 'tests/**'
+#  push:
+#    branches:
+#      - main
+#    paths:
+#      - 'deploy_content.yml'
+#      - '.github/workflows/tests-*.yml'
+#      - 'infra/**'
+#      - 'services/**'
+#      - 'tests/**'
   workflow_dispatch:
     inputs:
       environment:

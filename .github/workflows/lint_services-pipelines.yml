@@ -2,11 +2,12 @@
 name: Lint Services and Pipelines
 
 on:
-  push:
-    paths:
-      - '.github/workflows/lint_services-pipelines.yml'
-      - 'services/**'
-      - 'pipelines/**'
+  workflow_dispatch:
+#  push:
+#    paths:
+#      - '.github/workflows/lint_services-pipelines.yml'
+#      - 'services/**'
+#      - 'pipelines/**'
 
 jobs:
   lint-python:

@@ -1,0 +1,116 @@
+---
+name: "Deploy - Global Infrastructure"
+run-name: >-
+  ${{
+    github.event_name == 'push'
+    && github.event.head_commit.message
+    || format('Manual deploy #{0}', github.run_number)
+  }}
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'infra/global/**'
+      - '.github/workflows/deploy_infra_global.yml'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  qa:
+    name: QA Checks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra/global
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.13.1
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v6
+        with:
+          tflint_version: v0.52.0
+          cache: true
+
+      - name: Install Just
+        uses: extractions/setup-just@v3
+
+      - name: Terraform Init
+        run: just init local --backend=false
+
+      - name: Terraform Format Check
+        run: just fmt
+
+      - name: Terraform Validate
+        run: just validate
+
+      - name: Terraform TFLint
+        run: just lint
+
+      - name: Install Checkov
+        run: pip install checkov
+
+      - name: Checkov
+        run: just checkov
+
+      - name: Install Trivy
+        run: |
+          sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key \
+            | sudo gpg --dearmor -o /usr/share/keyrings/trivy.gpg
+          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] \
+            https://aquasecurity.github.io/trivy-repo/deb \
+            $(lsb_release -sc) main" \
+            | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+
+      - name: Trivy
+        run: just trivy
+
+  deploy:
+    name: Deploy
+    needs: qa
+    runs-on: ubuntu-latest
+    environment: dev
+    defaults:
+      run:
+        working-directory: infra/global
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.13.1
+
+      - name: Install Just
+        uses: extractions/setup-just@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: eu-west-1
+
+      - name: Terraform Init
+        run: just init dev
+
+      - name: Terraform Plan
+        run: just plan dev
+
+#      - name: Terraform Apply
+#        run: just apply dev --auto-approve
