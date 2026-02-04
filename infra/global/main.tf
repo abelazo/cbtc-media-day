@@ -1,8 +1,13 @@
-# Get current AWS account ID
 data "aws_caller_identity" "current" {}
 
-# S3 bucket for Lambda source code
+# S3 bucket for Lambda source code ############################################
 resource "aws_s3_bucket" "lambda_sources" {
+  #checkov:skip=CKV_AWS_18:No login required
+  #checkov:skip=CKV_AWS_21:No versioning required for this bucket
+  #checkov:skip=CKV_AWS_144:No cross-region replication required
+  #checkov:skip=CKV_AWS_145:AES256 encryption is enough
+  #checkov:skip=CKV2_AWS_62:No event notifications required
+
   bucket = "lambda-sources-${var.environment}-${data.aws_caller_identity.current.account_id}"
 
   tags = {
@@ -23,7 +28,7 @@ resource "aws_s3_bucket_versioning" "lambda_sources" {
   bucket = aws_s3_bucket.lambda_sources.id
 
   versioning_configuration {
-    status = "Enabled"
+    status = "Disabled"
   }
 }
 #trivy:ignore:AWS-0132
@@ -33,6 +38,32 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "lambda_sources" {
   rule {
     apply_server_side_encryption_by_default {
       sse_algorithm = "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "lambda_packages" {
+  bucket = aws_s3_bucket.lambda_sources.id
+
+  rule {
+    id     = "expire-old-versions"
+    status = "Enabled"
+
+    filter {}
+
+    noncurrent_version_expiration {
+      noncurrent_days = 30
+    }
+  }
+
+  rule {
+    id     = "abort-incomplete-multipart-uploads"
+    status = "Enabled"
+
+    filter {}
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
     }
   }
 }
