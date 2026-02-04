@@ -1,11 +1,11 @@
-# ========================================
-# API Gateway
-# ========================================
-
-# API Gateway REST API
+# API Gateway #################################################################
 resource "aws_api_gateway_rest_api" "main" {
   name        = "${var.project_name}-${var.environment}-api"
   description = "API Gateway for ${var.project_name}"
+
+  lifecycle {
+    create_before_destroy = true
+  }
 
   tags = {
     Name = "${var.project_name}-${var.environment}-api"
@@ -92,7 +92,6 @@ resource "aws_lambda_permission" "api_gateway" {
   source_arn    = "${aws_api_gateway_rest_api.main.execution_arn}/*/*"
 }
 
-# API Gateway deployment
 resource "aws_api_gateway_deployment" "v1" {
   rest_api_id = aws_api_gateway_rest_api.main.id
 
@@ -116,8 +115,12 @@ resource "aws_api_gateway_deployment" "v1" {
   ]
 }
 
-# API Gateway stage v1
+
 resource "aws_api_gateway_stage" "v1" {
+  #checkov:skip=CKV_AWS_73:Not activating X-Ray for cost reasons
+  #checkov:skip=CKV_AWS_76:Not activating access logging for cost reasons
+  #checkov:skip=CKV_AWS_120:Not activating Catching for cost reasons
+
   deployment_id = aws_api_gateway_deployment.v1.id
   rest_api_id   = aws_api_gateway_rest_api.main.id
   stage_name    = "v1"

@@ -48,7 +48,6 @@ htmlcov/
 *.tfstate
 *.tfstate.backup
 *.tfplan
-.terraform.lock.hcl
 
 .config.dev.tfbackend
 .config.prod.tfbackend

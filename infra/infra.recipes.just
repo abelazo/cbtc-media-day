@@ -42,8 +42,19 @@ validate:
 # Lint Terraform configuration
 [group('lint')]
 lint:
+  tflint --init
   tflint --recursive
+
+# Checkov
+[group('lint')]
+checkov:
+  checkov --directory . --framework terraform
+
+# Trivy
+[group('lint')]
+trivy:
+  trivy --exit-code 1 --severity HIGH,CRITICAL config .
 
 # Check
 [group('lint')]
-check: fmt validate lint
+check: fmt validate lint checkov trivy

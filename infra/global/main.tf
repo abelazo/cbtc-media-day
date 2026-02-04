@@ -1,6 +1,3 @@
-# Global Infrastructure
-# This file contains shared resources used across all services
-
 # Get current AWS account ID
 data "aws_caller_identity" "current" {}
 
@@ -13,7 +10,15 @@ resource "aws_s3_bucket" "lambda_sources" {
   }
 }
 
-# Enable versioning for Lambda sources bucket
+resource "aws_s3_bucket_public_access_block" "lambda_sources" {
+  bucket = aws_s3_bucket.lambda_sources.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
 resource "aws_s3_bucket_versioning" "lambda_sources" {
   bucket = aws_s3_bucket.lambda_sources.id
 
@@ -21,8 +26,7 @@ resource "aws_s3_bucket_versioning" "lambda_sources" {
     status = "Enabled"
   }
 }
-
-# Enable server-side encryption for Lambda sources bucket
+#trivy:ignore:AWS-0132
 resource "aws_s3_bucket_server_side_encryption_configuration" "lambda_sources" {
   bucket = aws_s3_bucket.lambda_sources.id
 

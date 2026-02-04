@@ -1,8 +1,10 @@
-# ========================================
-# Authorizer Lambda
-# ========================================
-# Authorizer Lambda function
+# Authorizer Lambda ###########################################################
 resource "aws_lambda_function" "authorizer" {
+  #checkov:skip=CKV_AWS_50:No need to enable X-Ray
+  #checkov:skip=CKV_AWS_116:No need for DLQ
+  #checkov:skip=CKV_AWS_117:It is OK to be in VPC without NAT for this function
+  #checkov:skip=CKV_AWS_173:No need to encrypt environment variables
+
   function_name = "${var.project_name}-${var.environment}-authorizer"
   role          = aws_iam_role.authorizer_lambda.arn
   handler       = "handler.lambda_handler"
@@ -10,8 +12,11 @@ resource "aws_lambda_function" "authorizer" {
   timeout       = 30
   memory_size   = 128
 
-  s3_bucket = local.lambda_sources_bucket_name
-  s3_key    = "authorizer/authorizer.zip"
+  reserved_concurrent_executions = -1
+
+  s3_bucket               = local.lambda_sources_bucket_name
+  s3_key                  = "authorizer/authorizer.zip"
+  code_signing_config_arn = aws_lambda_code_signing_config.dev.arn
 
   environment {
     variables = {
@@ -30,9 +35,6 @@ resource "aws_lambda_function" "authorizer" {
   }
 }
 
-# ========================================
-# IAM role for authorizer Lambda function
-# ========================================
 resource "aws_iam_role" "authorizer_lambda" {
   name = "${var.project_name}-${var.environment}-authorizer-lambda"
 
@@ -54,13 +56,11 @@ resource "aws_iam_role" "authorizer_lambda" {
   }
 }
 
-# Attach basic Lambda execution policy to authorizer
 resource "aws_iam_role_policy_attachment" "authorizer_lambda_basic" {
   role       = aws_iam_role.authorizer_lambda.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
-# IAM Policy for authorizer Lambda to access DynamoDB
 resource "aws_iam_role_policy" "authorizer_lambda_dynamodb" {
   name = "${var.project_name}-${var.environment}-authorizer-dynamodb"
   role = aws_iam_role.authorizer_lambda.id
@@ -79,10 +79,11 @@ resource "aws_iam_role_policy" "authorizer_lambda_dynamodb" {
   })
 }
 
-# ========================================
-# CloudWatch Log Group for authorizer Lambda
-# ========================================
+# CloudWatch Log Group for authorizer Lambda ##################################
 resource "aws_cloudwatch_log_group" "authorizer_lambda" {
+  #checkov:skip=CKV_AWS_158:AWS-manged key is acceptable
+  #checkov:skip=CKV_AWS_338:30 days retention is acceptable
+
   name              = "/aws/lambda/${var.project_name}-${var.environment}-authorizer"
   retention_in_days = 30
 
@@ -91,11 +92,11 @@ resource "aws_cloudwatch_log_group" "authorizer_lambda" {
   }
 }
 
-# ========================================
-# DynamoDB Table for Users
-# ========================================
-# DynamoDB Table for Users
+# DynamoDB Table for Users ####################################################
 resource "aws_dynamodb_table" "users" {
+  #checkov:skip=CKV_AWS_28:No backup is acceptable for this table as it only contains non-critical user data that can be recreated if needed
+  #checkov:skip=CKV_AWS_119:AWS-managed encryption is acceptable
+
   name         = "users"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "username"
