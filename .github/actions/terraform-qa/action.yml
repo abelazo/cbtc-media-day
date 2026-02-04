@@ -1,0 +1,81 @@
+---
+name: Terraform QA
+description: >-
+  Run Terraform QA checks: fmt, validate, tflint, checkov and trivy.
+
+inputs:
+  working-directory:
+    description: Path to the Terraform module directory
+    required: true
+  terraform-version:
+    description: Terraform version to install
+    required: false
+    default: "1.13.1"
+  tflint-version:
+    description: TFLint version to install
+    required: false
+    default: "v0.52.0"
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: ${{ inputs.terraform-version }}
+
+    - name: Setup TFLint
+      uses: terraform-linters/setup-tflint@v6
+      with:
+        tflint_version: ${{ inputs.tflint-version }}
+        cache: true
+
+    - name: Install Just
+      uses: extractions/setup-just@v3
+
+    - name: Terraform Init
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: just init local --backend=false
+
+    - name: Terraform Format Check
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: just fmt
+
+    - name: Terraform Validate
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: just validate
+
+    - name: Terraform TFLint
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: just lint
+
+    - name: Install Checkov
+      shell: bash
+      run: pip install checkov
+
+    - name: Checkov
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: just checkov
+
+    - name: Install Trivy
+      shell: bash
+      run: |
+        sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+        wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key \
+          | sudo gpg --dearmor -o /usr/share/keyrings/trivy.gpg
+        echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] \
+          https://aquasecurity.github.io/trivy-repo/deb \
+          $(lsb_release -sc) main" \
+          | sudo tee /etc/apt/sources.list.d/trivy.list
+        sudo apt-get update
+        sudo apt-get install -y trivy
+
+    - name: Trivy
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: just trivy

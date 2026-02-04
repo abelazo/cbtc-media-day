@@ -24,60 +24,15 @@ jobs:
   qa:
     name: QA Checks
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: infra/global
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+      - name: Terraform QA
+        uses: ./.github/actions/terraform-qa
         with:
-          terraform_version: 1.13.1
-
-      - name: Setup TFLint
-        uses: terraform-linters/setup-tflint@v6
-        with:
-          tflint_version: v0.52.0
-          cache: true
-
-      - name: Install Just
-        uses: extractions/setup-just@v3
-
-      - name: Terraform Init
-        run: just init local --backend=false
-
-      - name: Terraform Format Check
-        run: just fmt
-
-      - name: Terraform Validate
-        run: just validate
-
-      - name: Terraform TFLint
-        run: just lint
-
-      - name: Install Checkov
-        run: pip install checkov
-
-      - name: Checkov
-        run: just checkov
-
-      - name: Install Trivy
-        run: |
-          sudo apt-get install -y wget apt-transport-https gnupg lsb-release
-          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key \
-            | sudo gpg --dearmor -o /usr/share/keyrings/trivy.gpg
-          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] \
-            https://aquasecurity.github.io/trivy-repo/deb \
-            $(lsb_release -sc) main" \
-            | sudo tee /etc/apt/sources.list.d/trivy.list
-          sudo apt-get update
-          sudo apt-get install -y trivy
-
-      - name: Trivy
-        run: just trivy
+          working-directory: infra/global
 
   deploy:
     name: Deploy
@@ -110,7 +65,7 @@ jobs:
         run: terraform init --backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" --backend-config="region=eu-west-1"
 
       - name: Terraform Init
-        run: terraform workspace dev
+        run: just workspace dev
 
       - name: Terraform Plan
         run: just plan dev
