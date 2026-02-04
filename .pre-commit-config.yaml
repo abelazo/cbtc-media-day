@@ -60,6 +60,7 @@ repos:
 #        args: [ --soft-fail ]
       # - id: checkov_container
       - id: checkov_diff
+        files: ^(?!.*\.md$).*\.(tf|tfvars|hcl)$
       # - id: checkov_diff_container
       - id: checkov_secrets
       # - id: checkov_secrets_container

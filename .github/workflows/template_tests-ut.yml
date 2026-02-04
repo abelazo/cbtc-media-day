@@ -27,12 +27,12 @@ jobs:
         with:
           enable-cache: true
 
+      - name: Install Just
+        uses: extractions/setup-just@v2
+
       - name: Install dependencies
         run: |
           just sync ${{ inputs.service-name }}
-
-      - name: Install Just
-        uses: extractions/setup-just@v2
 
       - name: Run Services Unit Tests
         working-directory: "services/${{ inputs.service-name }}"

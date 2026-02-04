@@ -1,10 +1,10 @@
 # CBTC Media Day
 
-| Pipeline                | Status                                                                                                                                                                                          |
-|-------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Deploy                  | [![Deploy](https://github.com/abelazo/cbtc-media-day/actions/workflows/deploy.yml/badge.svg)](https://github.com/abelazo/cbtc-media-day/actions/workflows/deploy.yml)                           |
-| Infrastructure lint     | [![Infrastructure](https://github.com/abelazo/cbtc-media-day/actions/workflows/lint_infra.yml/badge.svg)](https://github.com/abelazo/cbtc-media-day/actions/workflows/lint_infra.yml)           |
-| Services/Pipelines lint | [![Services](https://github.com/abelazo/cbtc-media-day/actions/workflows/lint_services-pipelines.yml/badge.svg)](https://github.com/abelazo/cbtc-media-day/actions/workflows/lint_services-pipelines.yml) |
+| Pipeline                        | Status                                                                                                                                                                                                                        |
+|---------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Deploy Infra - Global           | [![Deploy - Global Infrastructure](https://github.com/abelazo/cbtc-media-day/actions/workflows/deploy-infra_global.yml/badge.svg)](https://github.com/abelazo/cbtc-media-day/actions/workflows/deploy-infra_global.yml)       |
+| Deploy Lambda - Content Service | [![Deploy Lambda - Content](https://github.com/abelazo/cbtc-media-day/actions/workflows/deploy-lambda_content.yml/badge.svg)](https://github.com/abelazo/cbtc-media-day/actions/workflows/deploy-lambda_content.yml)          |
+| Deploy Lambda - Authorizer      | [![Deploy Lambda - Authorizer](https://github.com/abelazo/cbtc-media-day/actions/workflows/deploy-lambda_authorizer.yml/badge.svg)](https://github.com/abelazo/cbtc-media-day/actions/workflows/deploy-lambda_authorizer.yml) |
 
 A serverless AWS application built with Python 3.12 and Terraform, following Test-Driven Development (TDD) principles.
 

@@ -1,5 +1,5 @@
 ---
-name: Deploy Lambda - Content
+name: Deploy Lambda - Authorizer
 run-name: >-
   ${{
     github.event_name == 'push'
