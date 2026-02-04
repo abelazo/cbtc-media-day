@@ -28,7 +28,7 @@ resource "aws_s3_bucket_versioning" "lambda_sources" {
   bucket = aws_s3_bucket.lambda_sources.id
 
   versioning_configuration {
-    status = "Disabled"
+    status = "Enabled"
   }
 }
 #trivy:ignore:AWS-0132
@@ -52,7 +52,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "lambda_packages" {
     filter {}
 
     noncurrent_version_expiration {
-      noncurrent_days = 30
+      noncurrent_days = 7
     }
   }
 

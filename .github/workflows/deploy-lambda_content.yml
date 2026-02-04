@@ -24,7 +24,7 @@ on:
 
 jobs:
   unit-tests:
-    uses: ./.github/workflows/tests-ut.yml
+    uses: ./.github/workflows/template_tests-ut.yml
 
 #  e2e-tests:
 #    needs: unit-tests
