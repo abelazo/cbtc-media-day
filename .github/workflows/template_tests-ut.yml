@@ -3,10 +3,11 @@ name: "[template] Unit Tests"
 
 on:
   workflow_call:
-  pull_request:
-    paths:
-      - 'services/**'
-      - 'pipelines/**'
+    inputs:
+      service-name:
+        description: 'Name of the service to test'
+        required: true
+        type: string
 
 jobs:
   unit-tests:
@@ -28,15 +29,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv sync --all-packages --all-extras
+          uv sync --package ${{ inputs.service-name }} --all-extras
 
       - name: Install Just
         uses: extractions/setup-just@v2
 
       - name: Run Services Unit Tests
+        working-directory: "services/${{ inputs.service-name }}"
         run: |
-          just services::test-all
-
-      - name: Run Pipelines Unit Tests
-        run: |
-          just pipelines::test-all
+          just test
