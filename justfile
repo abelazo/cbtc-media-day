@@ -34,7 +34,7 @@ sync-all:
 
 sync package:
     @echo "Syncing development environment for package..."
-    uv sync --package {{package}} --all-extras
+    uv sync --package cbtc-media-day --package {{package}} --all-extras
 
 # Clean build artifacts and caches
 [group('setup')]
