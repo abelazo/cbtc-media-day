@@ -76,9 +76,13 @@ resource "aws_iam_role_policy" "content_lambda_s3" {
       {
         Effect = "Allow"
         Action = [
-          "s3:GetObject"
+          "s3:GetObject",
+          "s3:ListBucket",
         ]
-        Resource = "${aws_s3_bucket.content.arn}/*"
+        Resource = [
+          aws_s3_bucket.content.arn,
+          "${aws_s3_bucket.content.arn}/*"
+        ]
       }
     ]
   })
